@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EVC Management - Charging Station Alerts</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: "#f0fdf4",
+              500: "#22c55e",
+              600: "#16a34a",
+              700: "#15803d"
+            }
+          },
+          boxShadow: {
+            panel: "0 18px 40px rgba(15, 23, 42, 0.10)"
+          }
+        }
+      }
+    };
+  </script>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-emerald-50 via-slate-100 to-white text-slate-900 antialiased">
+  <div class="min-h-screen">
+    <div class="flex-1">
+      <header class="w-full border-b border-emerald-100/80 bg-white/80 backdrop-blur">
+        <div class="flex w-full items-center justify-between px-6 py-5 lg:px-8">
+    <div class="space-y-1">
+      <p class="text-sm font-semibold uppercase tracking-[0.18em] text-green-600">Alert Center</p>
+      <h2 class="text-3xl font-bold tracking-tight text-emerald-950 sm:text-[2rem]">Charging Station Alerts</h2>
+      <p class="text-sm text-slate-500">Monitor active incidents, severity levels, and resolution progress across stations.</p>
+    </div>
+
+          <div class="flex items-center gap-3">
+            <a
+              id="backToSourceBtn"
+              href="poles.html"
+              class="inline-flex h-11 w-11 items-center justify-center rounded-full border border-emerald-200 bg-emerald-50 text-emerald-700 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:bg-emerald-100 hover:shadow-md focus:outline-none focus:ring-4 focus:ring-emerald-200"
+              aria-label="Back to page"
+              title="Back"
+            >
+              <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M15.75 19.25 8.75 12l7-7.25" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </a>
+          </div>
+  </div>
+</header>
+
+      <main class="w-full px-6 py-8 lg:px-8">
+        <section class="w-full rounded-[28px] border border-slate-200/80 border-l-4 border-l-emerald-500 bg-gradient-to-br from-white via-emerald-50/30 to-slate-50 p-6 shadow-md transition-all duration-200 hover:shadow-lg">
+          <div class="flex items-center justify-between gap-3">
+            <div>
+              <h3 class="text-lg font-semibold tracking-tight text-slate-800">Quick Overview</h3>
+              <p class="mt-1 text-sm text-slate-500">Severity and resolution summary of all alerts.</p>
+            </div>
+          </div>
+
+          <div class="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <section class="rounded-3xl border border-slate-200 bg-white/80 p-4 shadow-sm transition-all duration-200 hover:shadow-md">
+              <div class="mb-4 flex items-center justify-between gap-3">
+                <h4 class="text-sm font-semibold uppercase tracking-[0.14em] text-slate-700">Severity Overview</h4>
+                <span class="rounded-full bg-emerald-100 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-emerald-700">Alerts</span>
+              </div>
+
+              <div class="grid grid-cols-2 gap-3">
+                <div class="rounded-2xl border border-rose-100 bg-rose-50 p-3 shadow-sm">
+                  <div class="text-[11px] font-semibold uppercase tracking-[0.16em] text-rose-500">High</div>
+                  <div id="summaryCritical" class="mt-2 text-xl font-bold tracking-tight text-rose-700">0</div>
+                </div>
+                <div class="rounded-2xl border border-amber-100 bg-amber-50 p-3 shadow-sm">
+                  <div class="text-[11px] font-semibold uppercase tracking-[0.16em] text-amber-500">Medium</div>
+                  <div id="summaryMedium" class="mt-2 text-xl font-bold tracking-tight text-amber-700">0</div>
+                </div>
+                <div class="rounded-2xl border border-slate-200 bg-slate-100 p-3 shadow-sm">
+                  <div class="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">Low</div>
+                  <div id="summaryLow" class="mt-2 text-xl font-bold tracking-tight text-slate-700">0</div>
+                </div>
+                <div class="rounded-2xl border border-emerald-100 bg-emerald-50 p-3 shadow-sm">
+                  <div class="text-[11px] font-semibold uppercase tracking-[0.16em] text-emerald-600">Total</div>
+                  <div id="summaryTotal" class="mt-2 text-xl font-bold tracking-tight text-emerald-700">0</div>
+                </div>
+              </div>
+            </section>
+
+            <section class="rounded-3xl border border-slate-200 bg-white/80 p-4 shadow-sm transition-all duration-200 hover:shadow-md">
+              <div class="mb-4 flex items-center justify-between gap-3">
+                <h4 class="text-sm font-semibold uppercase tracking-[0.14em] text-slate-700">Status Overview</h4>
+                <span class="rounded-full bg-green-100 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-green-700">Resolution</span>
+              </div>
+
+              <div class="grid grid-cols-1 gap-3">
+                <div class="grid grid-cols-2 gap-3">
+                  <div class="rounded-2xl border border-emerald-100 bg-emerald-50 p-3 shadow-sm">
+                    <div class="text-[11px] font-semibold uppercase tracking-[0.16em] text-emerald-600">Resolved</div>
+                    <div id="summaryResolved" class="mt-2 text-xl font-bold tracking-tight text-emerald-700">0</div>
+                  </div>
+                  <div class="rounded-2xl border border-slate-200 bg-slate-100 p-3 shadow-sm">
+                    <div class="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">Unresolved</div>
+                    <div id="summaryOpen" class="mt-2 text-xl font-bold tracking-tight text-slate-700">0</div>
+                  </div>
+                </div>
+                <div class="rounded-2xl border border-green-100 bg-green-50 p-3 shadow-sm">
+                  <div class="text-[11px] font-semibold uppercase tracking-[0.16em] text-green-600">Total</div>
+                  <div id="summaryStatusTotal" class="mt-2 text-xl font-bold tracking-tight text-green-700">0</div>
+                </div>
+              </div>
+            </section>
+          </div>
+        </section>
+
+        <section class="mt-8 w-full rounded-[28px] border border-slate-200/80 border-l-4 border-l-green-500 bg-gradient-to-br from-white via-slate-50 to-emerald-50/20 p-6 shadow-md transition-all duration-200 hover:shadow-lg">
+          <div class="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+            <div>
+              <h3 class="text-xl font-semibold tracking-tight text-slate-800">Alert List</h3>
+              <p class="mt-1.5 text-sm leading-6 text-slate-500">Search, filter, and review the most important alerts in one streamlined view.</p>
+            </div>
+
+            <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+              <label class="relative block">
+                <span class="sr-only">Search alerts</span>
+                <svg class="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                  <circle cx="9" cy="9" r="5.75" stroke="currentColor" stroke-width="1.7"/>
+                  <path d="m13.5 13.5 4 4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+                </svg>
+                <input id="searchInput" type="search" placeholder="Search alerts..." class="w-full rounded-xl border border-slate-200 bg-slate-50/80 py-3.5 pl-11 pr-4 text-sm text-slate-700 shadow-sm outline-none transition duration-200 placeholder:text-slate-400 focus:border-brand-300 focus:bg-white focus:ring-4 focus:ring-emerald-100 sm:min-w-[240px]">
+              </label>
+              <select id="severityFilter" class="rounded-xl border border-slate-200 bg-slate-50/70 px-4 py-3.5 text-sm font-medium text-slate-700 shadow-sm outline-none transition duration-200 focus:border-brand-300 focus:bg-white focus:ring-4 focus:ring-emerald-100">
+                <option value="all">All severity levels</option>
+                <option value="low">Low</option>
+                <option value="medium">Medium</option>
+                <option value="critical">High</option>
+              </select>
+              <select id="statusFilter" class="rounded-xl border border-slate-200 bg-slate-50/70 px-4 py-3.5 text-sm font-medium text-slate-700 shadow-sm outline-none transition duration-200 focus:border-brand-300 focus:bg-white focus:ring-4 focus:ring-emerald-100">
+                <option value="all">All statuses</option>
+                <option value="open">Unresolved</option>
+                <option value="resolved">Resolved</option>
+              </select>
+            </div>
+          </div>
+        </section>
+
+        <section class="mt-8 w-full overflow-hidden rounded-[28px] border border-slate-200/80 border-l-4 border-l-emerald-500 bg-gradient-to-br from-white via-slate-50/70 to-emerald-50/20 shadow-md transition-all duration-200 hover:shadow-lg">
+          <div class="border-b border-slate-200 bg-gradient-to-r from-emerald-50/80 to-slate-50 px-6 py-4">
+            <div class="flex items-center justify-between gap-4">
+              <div>
+                <h3 class="text-xl font-semibold tracking-tight text-slate-800">Active Alerts Table</h3>
+                <p class="mt-1 text-sm text-slate-500">Detailed list of alert events with timestamp, severity, and status.</p>
+              </div>
+            </div>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full border-collapse">
+              <thead class="bg-slate-50/80">
+                <tr class="text-left text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
+                  <th class="px-6 py-4">Error Type</th>
+                  <th class="px-6 py-4">Station</th>
+                  <th class="px-6 py-4">Timestamp</th>
+                  <th class="px-6 py-4">Severity</th>
+                  <th class="px-6 py-4">Status</th>
+                </tr>
+              </thead>
+              <tbody id="alertsTableBody" class="divide-y divide-slate-100 [&>tr:nth-child(even)]:bg-slate-50/50 [&>tr]:transition [&>tr:hover]:bg-emerald-50/70"></tbody>
+            </table>
+          </div>
+          <div id="emptyState" class="hidden px-6 py-14 text-center text-sm font-medium text-slate-500">No alerts match the current filters.</div>
+          <div id="alertsPagination" class="hidden border-t border-slate-200 bg-white/70 px-6 py-4">
+            <div class="flex items-center justify-center gap-2" aria-label="Alerts pagination"></div>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <script src="./js/evcs-config.js"></script>
+  <script src="./js/pages/alerts-store.js"></script>
+  <script src="./js/pages/alerts.js"></script>
+  <script>
+    (function initAlertSourceBackLink() {
+      const backBtn = document.getElementById("backToSourceBtn");
+      if (!backBtn) return;
+
+      const target = typeof getPreviousPage === "function"
+        ? getPreviousPage("station.html")
+        : "station.html";
+
+      backBtn.href = target;
+    })();
+  </script>
+</body>
+</html>

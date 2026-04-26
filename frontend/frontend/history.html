@@ -1,0 +1,913 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>History</title>
+  <link rel="stylesheet" href="./css/style.css">
+  <style>
+    .sidebar--merged {
+      width: 214px;
+    }
+
+    .sidebar--merged .sidebar-shell {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      padding-bottom: 92px;
+      background: #ffffff;
+    }
+
+    .sidebar--merged .sidebar-primary {
+      width: 100%;
+      background: #ffffff;
+      padding: 18px 18px 0;
+      border-right: 0;
+      height: auto;
+      min-height: auto;
+      max-height: none;
+      align-items: flex-start;
+    }
+
+    .sidebar--merged .sb-logo-wrap {
+      margin-bottom: 0;
+      align-items: flex-start;
+      align-self: flex-start;
+    }
+
+    .sidebar--merged .sb-icon-menu {
+      display: none;
+    }
+
+    .sidebar--merged .sb-primary-spacer {
+      display: none;
+    }
+
+    .sidebar--merged .sidebar-secondary {
+      width: 100%;
+      border-left: 0;
+      padding-top: 10px;
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .sidebar--merged .sb-secondary-panel {
+      display: none;
+    }
+
+    .sidebar--merged .sb-secondary-panel[data-panel="station"] {
+      display: block;
+      background: #ffffff;
+      min-height: auto;
+      padding-top: 0;
+    }
+
+    .sidebar--merged .sb-sec-group {
+      margin-bottom: 28px;
+    }
+
+    .sidebar--merged .sb-sec-title {
+      padding: 0 18px;
+      margin-bottom: 12px;
+    }
+
+    .sidebar--merged .sb-sec-link {
+      padding: 12px 18px;
+      border-radius: 12px;
+    }
+
+    .sidebar--merged .sb-sec-link.is-active {
+      background: #e6f7e9;
+    }
+
+    .sidebar--merged .avatar-btn {
+      position: absolute;
+      left: 18px;
+      bottom: 18px;
+    }
+
+    .history-view {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      background: transparent;
+      border: none;
+      padding: 0;
+    }
+
+    .history-hero,
+    .history-filters,
+    .history-grid,
+    .history-table-card {
+      background: #ffffff;
+      border: 1px solid #e5e7eb;
+      border-radius: 14px;
+    }
+
+    .history-hero {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 18px 20px;
+    }
+
+    .history-hero__title {
+      margin: 0 0 6px;
+      font-size: 24px;
+      color: #111827;
+    }
+
+    .history-hero__desc {
+      margin: 0;
+      color: #6b7280;
+      font-size: 14px;
+      line-height: 1.6;
+      max-width: 760px;
+    }
+
+    .history-export {
+      position: relative;
+      display: inline-flex;
+      justify-content: flex-end;
+    }
+
+    .history-export__trigger {
+      min-width: 146px;
+      background: #1f8f46;
+      color: #ffffff;
+      border: 1px solid #1f8f46;
+      border-radius: 12px;
+      padding: 12px 18px;
+      font-size: 15px;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 6px 16px rgba(31, 143, 70, 0.18);
+      cursor: pointer;
+    }
+
+    .history-export__trigger:hover {
+      background: #18753a;
+      border-color: #18753a;
+    }
+
+    .history-export__icon {
+      width: 22px;
+      height: 22px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .history-export__menu {
+      position: absolute;
+      top: calc(100% + 10px);
+      right: 0;
+      min-width: 146px;
+      background: #ffffff;
+      border: 1px solid #d1d5db;
+      border-radius: 12px;
+      box-shadow: 0 18px 34px rgba(15, 23, 42, 0.16);
+      padding: 8px;
+      display: none;
+      z-index: 50;
+    }
+
+    .history-export.is-open .history-export__menu {
+      display: grid;
+      gap: 6px;
+    }
+
+    .history-export__option {
+      width: 100%;
+      border: none;
+      background: #f8fafc;
+      color: #111827;
+      border-radius: 10px;
+      padding: 10px 12px;
+      font-size: 14px;
+      font-weight: 600;
+      text-align: left;
+      cursor: pointer;
+    }
+
+    .history-export__option:hover {
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .history-export__feedback {
+      display: none;
+      background: #ecfdf5;
+      border: 1px solid #bbf7d0;
+      color: #166534;
+      border-radius: 12px;
+      padding: 12px 16px;
+      font-size: 14px;
+    }
+
+    .history-export__feedback.is-visible {
+      display: block;
+    }
+
+    .history-export__feedback a {
+      color: #166534;
+      font-weight: 700;
+      text-decoration: underline;
+    }
+
+    .history-filters {
+      padding: 18px 20px 20px;
+    }
+
+    .history-filters__title {
+      margin: 0 0 14px;
+      color: #111827;
+      font-size: 18px;
+    }
+
+    .history-filters__grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .history-filters__actions {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 16px;
+    }
+
+    .history-filters__reset {
+      min-width: 108px;
+      min-height: 42px;
+      border: 1px solid #d1d5db;
+      border-radius: 12px;
+      background: #ffffff;
+      color: #374151;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+    }
+
+    .history-filters__reset:hover {
+      background: #f9fafb;
+      border-color: #9ca3af;
+      color: #111827;
+    }
+
+    .history-filters__error {
+      display: none;
+      margin: 8px 2px 0;
+      color: #dc2626;
+      font-size: 14px;
+      font-weight: 600;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .history-filters__error.is-visible {
+      display: inline-flex;
+    }
+
+    .history-filters__error-icon {
+      width: 16px;
+      height: 16px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .history-field label {
+      display: block;
+      margin-bottom: 8px;
+      color: #374151;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .history-field select,
+    .history-field input {
+      width: 100%;
+      min-height: 46px;
+      border: 1px solid #d1d5db;
+      border-radius: 12px;
+      padding: 0 14px;
+      font: inherit;
+      color: #111827;
+      background: #ffffff;
+    }
+
+    .history-date-trigger {
+      width: 100%;
+      min-height: 46px;
+      border: 1px solid #d1d5db;
+      border-radius: 12px;
+      padding: 0 14px;
+      background: #ffffff;
+      color: #111827;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      cursor: pointer;
+      font: inherit;
+    }
+
+    .history-date-trigger:hover,
+    .history-date-trigger.is-active {
+      border-color: #22c55e;
+      box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.12);
+    }
+
+    .history-date-trigger__text {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .history-date-trigger__icon {
+      color: #6b7280;
+      flex-shrink: 0;
+    }
+
+    .history-grid {
+      display: grid;
+      grid-template-columns: 1.4fr 1fr;
+      gap: 18px;
+      padding: 18px 20px;
+    }
+
+    .history-panel {
+      padding: 18px;
+      border-radius: 14px;
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+    }
+
+    .history-panel__title {
+      margin: 0 0 6px;
+      color: #111827;
+      font-size: 18px;
+    }
+
+    .history-panel__desc {
+      margin: 0 0 16px;
+      color: #6b7280;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .history-chart {
+      min-height: 260px;
+      display: flex;
+      align-items: flex-end;
+      gap: 14px;
+      padding-top: 10px;
+    }
+
+    .history-chart__bar {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+
+    .history-chart__value {
+      color: #374151;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .history-chart__column {
+      width: 100%;
+      max-width: 48px;
+      border-radius: 14px 14px 6px 6px;
+      background: linear-gradient(180deg, #86efac 0%, #22c55e 100%);
+      box-shadow: inset 0 -8px 14px rgba(21, 128, 61, 0.18);
+    }
+
+    .history-chart__label {
+      color: #6b7280;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .history-summary {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .history-metric {
+      border-radius: 12px;
+      background: #ffffff;
+      border: 1px solid #e5e7eb;
+      padding: 16px 14px;
+    }
+
+    .history-metric__label {
+      display: block;
+      color: #6b7280;
+      font-size: 13px;
+      margin-bottom: 8px;
+    }
+
+    .history-metric__value {
+      color: #111827;
+      font-size: 24px;
+      font-weight: 800;
+    }
+
+    .history-table-card {
+      padding: 18px 20px;
+    }
+
+    .history-table-card__head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .history-table-card__title {
+      margin: 0;
+      color: #111827;
+      font-size: 20px;
+    }
+
+    .history-table-wrap {
+      overflow-x: auto;
+    }
+
+    .history-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .history-table th,
+    .history-table td {
+      padding: 14px 12px;
+      text-align: left;
+      border-bottom: 1px solid #e5e7eb;
+      font-size: 14px;
+      color: #374151;
+      white-space: nowrap;
+    }
+
+    .history-table th {
+      color: #111827;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .history-table tbody tr:hover td {
+      background: #f9fafb;
+    }
+
+    .history-session-status {
+      display: inline-flex;
+      align-items: center;
+      border-radius: 999px;
+      padding: 7px 12px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .history-session-status--completed {
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .history-session-status--interrupted {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    .history-session-status--failed {
+      background: #fee2e2;
+      color: #b91c1c;
+    }
+
+    .history-detail-btn {
+      border: none;
+      background: #e8f7ef;
+      color: #15803d;
+      border-radius: 10px;
+      padding: 8px 12px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .history-empty {
+      display: none;
+      border: 1px dashed #d1d5db;
+      border-radius: 12px;
+      color: #6b7280;
+      padding: 18px;
+      text-align: center;
+      margin-top: 16px;
+    }
+
+    .history-empty.is-visible {
+      display: block;
+    }
+
+    .history-detail-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.42);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      z-index: 1000;
+    }
+
+    .history-detail-overlay.is-open {
+      display: flex;
+    }
+
+    .history-detail-modal {
+      width: min(100%, 720px);
+      background: #ffffff;
+      border-radius: 18px;
+      box-shadow: 0 30px 70px rgba(15, 23, 42, 0.24);
+      padding: 24px;
+    }
+
+    .history-detail-modal__header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+
+    .history-detail-modal__title {
+      margin: 0;
+      color: #111827;
+      font-size: 24px;
+    }
+
+    .history-detail-modal__close {
+      width: 40px;
+      height: 40px;
+      border: none;
+      border-radius: 999px;
+      background: #f3f4f6;
+      color: #374151;
+      font-size: 24px;
+      cursor: pointer;
+    }
+
+    .history-detail-modal__grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .history-detail-item {
+      padding: 14px 16px;
+      border-radius: 12px;
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+    }
+
+    .history-detail-item.full {
+      grid-column: 1 / -1;
+    }
+
+    .history-detail-item__label {
+      display: block;
+      color: #6b7280;
+      font-size: 13px;
+      margin-bottom: 8px;
+    }
+
+    .history-detail-item__value {
+      color: #111827;
+      font-size: 15px;
+      line-height: 1.6;
+    }
+
+    @media (max-width: 1200px) {
+      .history-filters__grid,
+      .history-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .history-hero {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .history-detail-modal__grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-layout">
+    <aside class="sidebar sidebar--merged" aria-label="Main navigation">
+      <div class="sidebar-shell">
+        <div class="sidebar-primary">
+          <div class="sb-logo-wrap">
+            <a href="station.html" class="sb-logo logo-container" aria-label="changeon home">
+              <svg class="sb-logo__svg" width="100" height="100" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <rect class="sb-logo__frame" x="13" y="13" width="74" height="74" rx="14" stroke="#4ade80" stroke-width="5"/>
+                <rect x="36" y="27" width="7" height="14" rx="2" fill="#4ade80"/>
+                <rect x="57" y="27" width="7" height="14" rx="2" fill="#4ade80"/>
+                <path d="M34 44C34 42.8954 34.8954 42 36 42H64C65.1046 42 66 42.8954 66 44V55C66 60.5228 61.5228 65 56 65H44C38.4772 65 34 60.5228 34 55V44Z" fill="#4ade80"/>
+                <rect x="46" y="64" width="8" height="13" rx="2" fill="#4ade80"/>
+                <path d="M51 48L46 54H50L49 59L54 53H50L51 48Z" fill="#1a222e"/>
+              </svg>
+              <div class="text-logo">changeon</div>
+            </a>
+          </div>
+          <div class="sb-primary-spacer" aria-hidden="true"></div>
+          <button type="button" class="avatar-btn" title="Account" aria-label="User profile">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <defs>
+                <clipPath id="clipAvatarHistory">
+                  <circle cx="12" cy="12" r="10"/>
+                </clipPath>
+              </defs>
+              <g clip-path="url(#clipAvatarHistory)">
+                <rect width="24" height="24" fill="white"/>
+                <circle cx="12" cy="9" r="3" fill="#777"/>
+                <path d="M2 22c3-5 6-7 10-7s7 2 10 7H2z" fill="#777"/>
+              </g>
+              <circle cx="12" cy="12" r="10" stroke="#777" stroke-width="2" fill="none"/>
+            </svg>
+          </button>
+        </div>
+
+        <nav class="sidebar-secondary" aria-label="Section navigation">
+          <div class="sb-secondary-panel is-active" data-panel="station">
+            <div class="sb-sec-group">
+              <h3 class="sb-sec-title">General</h3>
+              <a href="station.html" class="sb-sec-link" id="stationNavLink">Station</a>
+              <a href="poles.html" class="sb-sec-link">Pole</a>
+            </div>
+            <div class="sb-sec-group">
+              <h3 class="sb-sec-title">Manage</h3>
+              <a href="monitor.html" class="sb-sec-link">Monitor</a>
+              <a href="history.html" class="sb-sec-link is-active" id="historyNavLink" aria-current="page">History</a>
+            </div>
+          </div>
+        </nav>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <header class="topbar">
+        <div class="topbar__left">
+          <h1 class="page-title">
+            <span class="page-title__base">EVC Management</span>
+            <span class="page-title__sep" aria-hidden="true"> &gt; </span>
+            <span id="pageTitleCurrent" class="page-title__current">History</span>
+          </h1>
+        </div>
+        <div class="topbar__actions">
+          <button type="button" id="notifToggle" class="bell-toggle" aria-label="Notifications" aria-pressed="false">
+            <span class="bell-toggle__icon" aria-hidden="true">
+              <svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="1" y="1" width="62" height="62" rx="16" fill="#D8F2DF"/>
+                <path d="M32 20C28.134 20 25 23.134 25 27V29.712C25 30.534 24.734 31.334 24.242 31.994L22.803 33.921C21.694 35.406 22.754 37.5 24.607 37.5H39.393C41.246 37.5 42.306 35.406 41.197 33.921L39.758 31.994C39.266 31.334 39 30.534 39 29.712V27C39 23.134 35.866 20 32 20Z" fill="currentColor"/>
+                <path d="M28.5 39.25C29.123 41.109 30.268 42 32 42C33.732 42 34.877 41.109 35.5 39.25H28.5Z" fill="currentColor"/>
+              </svg>
+            </span>
+            <span class="bell-badge is-hidden" aria-live="polite">0</span>
+          </button>
+        </div>
+      </header>
+
+      <section class="card history-view">
+        <div class="history-hero">
+          <div>
+            <h2 class="history-hero__title">Station Usage History</h2>
+            <p class="history-hero__desc">Review charging session history by station, connector, and session status to analyze usage trends and support issue diagnosis.</p>
+          </div>
+          <div class="history-export" id="historyExportMenu">
+            <button type="button" class="history-export__trigger" id="historyExportTrigger" aria-haspopup="menu" aria-expanded="false">
+              <span class="history-export__icon" aria-hidden="true">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M12 3V14" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M7.5 10.5L12 15L16.5 10.5" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M3 18.2C3 17.0954 3.89543 16.2 5 16.2H7.3C7.8198 16.2 8.30877 16.4545 8.61 16.8825L9.15 17.6494C9.45042 18.0762 9.93854 18.33 10.4575 18.33H13.5425C14.0615 18.33 14.5496 18.0762 14.85 17.6494L15.39 16.8825C15.6912 16.4545 16.1802 16.2 16.7 16.2H19C20.1046 16.2 21 17.0954 21 18.2V18.9C21 20.0598 20.0598 21 18.9 21H5.1C3.9402 21 3 20.0598 3 18.9V18.2Z" fill="currentColor"/>
+                  <circle cx="18" cy="18.7" r="1.1" fill="#17863A"/>
+                </svg>
+              </span>
+              <span>Export File</span>
+            </button>
+            <div class="history-export__menu" id="historyExportOptions" role="menu" aria-label="Export file type">
+              <button type="button" class="history-export__option" data-export-type="csv" role="menuitem">CSV</button>
+              <button type="button" class="history-export__option" data-export-type="xlsx" role="menuitem">XLSX</button>
+              <button type="button" class="history-export__option" data-export-type="pdf" role="menuitem">PDF</button>
+            </div>
+          </div>
+        </div>
+
+        <div id="historyExportFeedback" class="history-export__feedback" aria-live="polite"></div>
+
+        <div class="history-filters">
+          <h3 class="history-filters__title">Filter Sessions</h3>
+          <div class="history-filters__grid">
+            <div class="history-field">
+              <label for="historyDateFrom">From Date</label>
+              <input id="historyDateFrom" type="hidden" value="2026-03-01">
+              <button type="button" id="historyDateFromTrigger" class="history-date-trigger" aria-haspopup="dialog" aria-expanded="false">
+                <span id="historyDateFromText" class="history-date-trigger__text">Mar 01, 2026</span>
+                <span class="history-date-trigger__icon" aria-hidden="true">▾</span>
+              </button>
+              <p id="historyDateError" class="history-filters__error" role="alert" aria-live="polite">
+                <span class="history-filters__error-icon" aria-hidden="true">
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M8 1.5L15 14H1L8 1.5Z" fill="#DC2626"/>
+                    <path d="M8 5.2V9" stroke="#ffffff" stroke-width="1.6" stroke-linecap="round"/>
+                    <circle cx="8" cy="11.5" r="0.9" fill="#ffffff"/>
+                  </svg>
+                </span>
+                <span>Thời gian không hợp lệ</span>
+              </p>
+            </div>
+            <div class="history-field">
+              <label for="historyDateTo">To Date</label>
+              <input id="historyDateTo" type="hidden" value="2026-04-01">
+              <button type="button" id="historyDateToTrigger" class="history-date-trigger" aria-haspopup="dialog" aria-expanded="false">
+                <span id="historyDateToText" class="history-date-trigger__text">Apr 01, 2026</span>
+                <span class="history-date-trigger__icon" aria-hidden="true">▾</span>
+              </button>
+            </div>
+            <div class="history-field">
+              <label for="historyStationFilter">Station</label>
+              <select id="historyStationFilter"></select>
+            </div>
+            <div class="history-field">
+              <label for="historyConnectorFilter">Connector</label>
+              <select id="historyConnectorFilter"></select>
+            </div>
+            <div class="history-field">
+              <label for="historyStatusFilter">Session Status</label>
+              <select id="historyStatusFilter">
+                <option value="all">All Status</option>
+                <option value="completed">Completed</option>
+                <option value="cancelled">Cancelled</option>
+                <option value="failed">Failed</option>
+                <option value="ongoing">Ongoing</option>
+              </select>
+            </div>
+            <div class="history-field">
+              <label for="historyChartMode">Chart View</label>
+              <select id="historyChartMode">
+                <option value="day">By Day</option>
+                <option value="week">By Week</option>
+              </select>
+            </div>
+          </div>
+          <div class="history-filters__actions">
+            <button type="button" id="historyResetFilters" class="history-filters__reset">Reset</button>
+          </div>
+        </div>
+
+        <div class="history-grid">
+          <div class="history-panel">
+            <h3 class="history-panel__title">Usage Trend</h3>
+            <p class="history-panel__desc">Session volume by day or week based on the current filters.</p>
+            <div id="historyChart" class="history-chart"></div>
+          </div>
+          <div class="history-panel">
+            <h3 class="history-panel__title">Summary</h3>
+            <p class="history-panel__desc">Quick metrics to evaluate charging station usage.</p>
+            <div class="history-summary">
+              <div class="history-metric">
+                <span class="history-metric__label">Total Sessions</span>
+                <strong id="historyMetricSessions" class="history-metric__value">0</strong>
+              </div>
+              <div class="history-metric">
+                <span class="history-metric__label">Energy Delivered</span>
+                <strong id="historyMetricEnergy" class="history-metric__value">0 kWh</strong>
+              </div>
+              <div class="history-metric">
+                <span class="history-metric__label">Average Duration</span>
+                <strong id="historyMetricDuration" class="history-metric__value">0 min</strong>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="history-table-card">
+          <div class="history-table-card__head">
+            <h3 class="history-table-card__title">Charging Sessions</h3>
+            <span id="historyResultCount" class="label">0 results</span>
+          </div>
+          <div class="history-table-wrap">
+            <table class="history-table">
+              <thead>
+                <tr>
+                  <th>Session ID</th>
+                  <th>Station</th>
+                  <th>Connector</th>
+                  <th>Start</th>
+                  <th>End</th>
+                  <th>kWh</th>
+                  <th>Duration</th>
+                  <th>Status</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="historyTableBody"></tbody>
+            </table>
+          </div>
+          <div id="historyEmptyState" class="history-empty">No results found</div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div id="historyDetailOverlay" class="history-detail-overlay" aria-hidden="true">
+    <div class="history-detail-modal" role="dialog" aria-modal="true" aria-labelledby="historyDetailTitle">
+      <div class="history-detail-modal__header">
+        <h2 id="historyDetailTitle" class="history-detail-modal__title">Session Details</h2>
+        <button type="button" id="historyDetailCloseBtn" class="history-detail-modal__close" aria-label="Close history details">×</button>
+      </div>
+      <div class="history-detail-modal__grid">
+        <div class="history-detail-item">
+          <span class="history-detail-item__label">Session ID</span>
+          <strong id="historyDetailSessionId" class="history-detail-item__value"></strong>
+        </div>
+        <div class="history-detail-item">
+          <span class="history-detail-item__label">Station</span>
+          <strong id="historyDetailStation" class="history-detail-item__value"></strong>
+        </div>
+        <div class="history-detail-item">
+          <span class="history-detail-item__label">Connector</span>
+          <strong id="historyDetailConnector" class="history-detail-item__value"></strong>
+        </div>
+        <div class="history-detail-item">
+          <span class="history-detail-item__label">Status</span>
+          <strong id="historyDetailStatus" class="history-detail-item__value"></strong>
+        </div>
+        <div class="history-detail-item">
+          <span class="history-detail-item__label">Start Time</span>
+          <strong id="historyDetailStart" class="history-detail-item__value"></strong>
+        </div>
+        <div class="history-detail-item">
+          <span class="history-detail-item__label">End Time</span>
+          <strong id="historyDetailEnd" class="history-detail-item__value"></strong>
+        </div>
+        <div class="history-detail-item">
+          <span class="history-detail-item__label">Energy</span>
+          <strong id="historyDetailEnergy" class="history-detail-item__value"></strong>
+        </div>
+        <div class="history-detail-item">
+          <span class="history-detail-item__label">Duration</span>
+          <strong id="historyDetailDuration" class="history-detail-item__value"></strong>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="historyDatePopover" class="coord-calendar-popover" role="dialog" aria-modal="true" aria-labelledby="historyDateTitle" aria-hidden="true">
+    <div class="coord-calendar">
+      <header class="coord-calendar__header">
+        <button type="button" class="coord-calendar__nav" id="historyDatePrevMonth" aria-label="Previous month">
+          <svg width="10" height="16" viewBox="0 0 10 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M8 1L2 8l6 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <h3 id="historyDateTitle" class="coord-calendar__title">March 2026</h3>
+        <button type="button" class="coord-calendar__nav" id="historyDateNextMonth" aria-label="Next month">
+          <svg width="10" height="16" viewBox="0 0 10 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M2 1l6 7-6 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+      </header>
+      <div class="coord-calendar__weekdays" aria-hidden="true">
+        <span>S</span><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span>
+      </div>
+      <div id="historyDateGrid" class="coord-calendar__grid"></div>
+      <footer class="coord-calendar__footer">
+        <button type="button" class="coord-calendar__btn-text" id="historyDateCancel">Cancel</button>
+        <button type="button" class="coord-calendar__btn-done" id="historyDateDone">Done</button>
+      </footer>
+    </div>
+  </div>
+
+  <script src="./js/common.js"></script>
+  <script src="./js/evcs-config.js"></script>
+  <script src="./js/pages/alerts-store.js"></script>
+  <script src="./js/pages/history.js"></script>
+</body>
+</html>

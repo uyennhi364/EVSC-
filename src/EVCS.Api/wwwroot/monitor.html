@@ -1,0 +1,1042 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Charging Station Monitor</title>
+  <link rel="stylesheet" href="./css/style.css">
+  <style>
+    .sidebar--merged {
+      width: 214px;
+    }
+
+    .sidebar--merged .sidebar-shell {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      padding-bottom: 92px;
+      background: #ffffff;
+    }
+
+    .sidebar--merged .sidebar-primary {
+      width: 100%;
+      background: #ffffff;
+      padding: 18px 18px 0;
+      border-right: 0;
+      height: auto;
+      min-height: auto;
+      max-height: none;
+      align-items: flex-start;
+    }
+
+    .sidebar--merged .sb-logo-wrap {
+      margin-bottom: 0;
+      align-items: flex-start;
+      align-self: flex-start;
+    }
+
+    .sidebar--merged .sb-icon-menu {
+      display: none;
+    }
+
+    .sidebar--merged .sb-primary-spacer {
+      display: none;
+    }
+
+    .sidebar--merged .sidebar-secondary {
+      width: 100%;
+      border-left: 0;
+      padding-top: 10px;
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .sidebar--merged .sb-secondary-panel {
+      display: none;
+    }
+
+    .sidebar--merged .sb-secondary-panel[data-panel="station"] {
+      display: block;
+      background: #ffffff;
+      min-height: auto;
+      padding-top: 0;
+    }
+
+    .sidebar--merged .sb-sec-group {
+      margin-bottom: 28px;
+    }
+
+    .sidebar--merged .sb-sec-title {
+      padding: 0 18px;
+      margin-bottom: 12px;
+    }
+
+    .sidebar--merged .sb-sec-link {
+      padding: 12px 18px;
+      border-radius: 12px;
+    }
+
+    .sidebar--merged .sb-sec-link.is-active {
+      background: #e6f7e9;
+    }
+
+    .sidebar--merged .avatar-btn {
+      position: absolute;
+      left: 18px;
+      bottom: 18px;
+    }
+
+    .monitor-view {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      background: transparent;
+      border: none;
+      padding: 0;
+    }
+
+    .monitor-hero,
+    .monitor-kpi-container,
+    .monitor-filters,
+    .monitor-grid {
+      background: #ffffff;
+      border: 1px solid #e5e7eb;
+      border-radius: 14px;
+    }
+
+    .monitor-hero {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 18px 20px;
+    }
+
+    .monitor-hero__title {
+      margin: 0 0 6px;
+      font-size: 24px;
+      color: #111827;
+    }
+
+    .monitor-hero__desc {
+      margin: 0;
+      color: #6b7280;
+      font-size: 14px;
+      line-height: 1.6;
+      max-width: 760px;
+    }
+
+    .monitor-kpi-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 12px;
+      padding: 16px;
+    }
+
+    .monitor-kpi-card {
+      padding: 14px;
+      border-radius: 10px;
+      text-align: center;
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+    }
+
+    .monitor-kpi-card__label {
+      font-size: 11px;
+      color: #6b7280;
+      font-weight: 600;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+      letter-spacing: 0.5px;
+    }
+
+    .monitor-kpi-card__value {
+      font-size: 24px;
+      color: #111827;
+      font-weight: 700;
+      margin: 0;
+    }
+
+    .monitor-kpi-card__subtext {
+      font-size: 11px;
+      color: #9ca3af;
+      margin-top: 4px;
+    }
+
+    .monitor-kpi-card--online {
+      background: #ecfdf5;
+      border-color: #a7f3d0;
+    }
+
+    .monitor-kpi-card--online .monitor-kpi-card__label {
+      color: #059669;
+    }
+
+    .monitor-kpi-card--online .monitor-kpi-card__value {
+      color: #059669;
+    }
+
+    .monitor-kpi-card--offline {
+      background: #fef2f2;
+      border-color: #fecaca;
+    }
+
+    .monitor-kpi-card--offline .monitor-kpi-card__label {
+      color: #dc2626;
+    }
+
+    .monitor-kpi-card--offline .monitor-kpi-card__value {
+      color: #dc2626;
+    }
+
+    .monitor-kpi-card--warning {
+      background: #fffbeb;
+      border-color: #fde68a;
+    }
+
+    .monitor-kpi-card--warning .monitor-kpi-card__label {
+      color: #d97706;
+    }
+
+    .monitor-kpi-card--warning .monitor-kpi-card__value {
+      color: #d97706;
+    }
+
+    .monitor-filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      padding: 16px;
+      align-items: center;
+    }
+
+    .monitor-filter-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .monitor-filter-label {
+      font-size: 13px;
+      color: #374151;
+      font-weight: 500;
+    }
+
+    .monitor-filter-input {
+      padding: 6px 10px;
+      border: 1px solid #d1d5db;
+      border-radius: 6px;
+      font-size: 13px;
+      color: #111827;
+      background: #ffffff;
+      min-width: 120px;
+      cursor: pointer;
+    }
+
+    .monitor-filter-btn {
+      padding: 6px 12px;
+      background: #f3f4f6;
+      border: 1px solid #d1d5db;
+      border-radius: 6px;
+      font-size: 13px;
+      color: #374151;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .monitor-filter-btn:hover {
+      background: #e5e7eb;
+    }
+
+    .monitor-pagination {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 10px 12px 12px;
+      border-top: 1px solid #e5e7eb;
+    }
+
+    .monitor-pagination.is-hidden {
+      display: none;
+    }
+
+    /* Pager: Prev | 1 | 2 | … — khối nút vuông bo góc như mockup */
+    .monitor-pagination__pager {
+      display: inline-flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .monitor-pagination__numbers {
+      display: inline-flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .monitor-pagination__ellipsis {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 28px;
+      font-size: 14px;
+      font-weight: 500;
+      color: #9ca3af;
+      user-select: none;
+    }
+
+    .monitor-pager-nav {
+      box-sizing: border-box;
+      width: 42px;
+      height: 42px;
+      padding: 0;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      background: #ffffff;
+      color: #111827;
+      cursor: pointer;
+      box-shadow: 0 1px 3px rgba(17, 24, 39, 0.08);
+      transition: background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease, color 0.15s ease;
+    }
+
+    .monitor-pager-nav svg {
+      width: 16px;
+      height: 16px;
+      flex-shrink: 0;
+    }
+
+    .monitor-pager-nav:hover:not(:disabled) {
+      background: #f9fafb;
+      border-color: #d1d5db;
+      box-shadow: 0 2px 6px rgba(17, 24, 39, 0.1);
+    }
+
+    .monitor-pager-nav:disabled {
+      background: #f9fafb;
+      color: #d1d5db;
+      border-color: #e5e7eb;
+      cursor: not-allowed;
+      box-shadow: 0 1px 2px rgba(17, 24, 39, 0.04);
+    }
+
+    .monitor-pager-page {
+      box-sizing: border-box;
+      width: 32px;
+      height: 32px;
+      padding: 0;
+      border: 1px solid #e5e7eb;
+      border-radius: 9px;
+      background: #ffffff;
+      font-size: 13px;
+      font-weight: 500;
+      font-family: inherit;
+      color: #111827;
+      line-height: 1;
+      cursor: pointer;
+      box-shadow: 0 1px 3px rgba(17, 24, 39, 0.08);
+      transition: background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease, color 0.15s ease;
+    }
+
+    .monitor-pager-page:hover:not(.is-active) {
+      background: #f9fafb;
+      border-color: #d1d5db;
+      box-shadow: 0 2px 6px rgba(17, 24, 39, 0.1);
+    }
+
+    .monitor-pager-page.is-active {
+      background: #22c55e;
+      border-color: #22c55e;
+      color: #ffffff;
+      font-weight: 600;
+      box-shadow: 0 2px 8px rgba(34, 197, 94, 0.35);
+      cursor: default;
+    }
+
+    .monitor-pager-page.is-active:hover {
+      background: #16a34a;
+      border-color: #16a34a;
+      color: #ffffff;
+    }
+
+    .monitor-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 14px;
+      padding: 16px;
+    }
+
+    .monitor-station-card {
+      background: #ffffff;
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      padding: 14px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .monitor-station-card:hover {
+      border-color: #2e8b63;
+      box-shadow: 0 4px 12px rgba(46, 139, 99, 0.1);
+    }
+
+    .monitor-station-card__header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 8px;
+    }
+
+    .monitor-station-card__name {
+      margin: 0;
+      font-size: 14px;
+      font-weight: 600;
+      color: #111827;
+    }
+
+    .monitor-status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 8px;
+      border-radius: 10px;
+      font-size: 10px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .monitor-status-badge--online {
+      background: #d1fae5;
+      color: #047857;
+    }
+
+    .monitor-status-badge--offline {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    .monitor-status-badge--error {
+      background: #ffedd5;
+      color: #c2410c;
+    }
+
+    .monitor-status-badge::before {
+      content: '';
+      width: 5px;
+      height: 5px;
+      background: currentColor;
+      border-radius: 50%;
+    }
+
+    .monitor-station-info {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      font-size: 12px;
+      color: #6b7280;
+    }
+
+    .monitor-info-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .monitor-info-label {
+      color: #9ca3af;
+    }
+
+    .monitor-info-value {
+      color: #374151;
+      font-weight: 500;
+    }
+
+    .monitor-connectors {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      padding-top: 8px;
+      border-top: 1px solid #e5e7eb;
+    }
+
+    .monitor-connector-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 4px 0;
+      font-size: 11px;
+    }
+
+    .monitor-connector-name {
+      color: #6b7280;
+    }
+
+    .monitor-connector-status {
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 9px;
+      font-weight: 600;
+    }
+
+    .monitor-connector-status--available {
+      background: #d1fae5;
+      color: #047857;
+    }
+
+    .monitor-connector-status--in-use {
+      background: #dbeafe;
+      color: #1e40af;
+    }
+
+    .monitor-connector-status--fault {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    .monitor-station-actions {
+      display: flex;
+      gap: 6px;
+      padding-top: 8px;
+      border-top: 1px solid #e5e7eb;
+    }
+
+    .monitor-action-btn {
+      flex: 1;
+      padding: 6px;
+      border: none;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .monitor-action-btn--view {
+      background: #d1fae5;
+      color: #047857;
+    }
+
+    .monitor-action-btn--view:hover {
+      background: #a7f3d0;
+    }
+
+
+    .monitor-empty {
+      grid-column: 1 / -1;
+      padding: 40px 20px;
+      text-align: center;
+      color: #9ca3af;
+      background: #ffffff;
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+    }
+
+    .monitor-empty.is-hidden {
+      display: none;
+    }
+
+    .monitor-empty__text {
+      margin: 0;
+      font-size: 14px;
+    }
+
+    /* Detail Drawer */
+    .monitor-detail-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 999;
+      background: rgba(0, 0, 0, 0.2);
+      display: none;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .monitor-detail-overlay.is-open {
+      display: block;
+      opacity: 1;
+    }
+
+    .monitor-detail-drawer {
+      position: fixed;
+      right: 0;
+      top: 0;
+      width: 100%;
+      max-width: 380px;
+      height: 100vh;
+      background: #ffffff;
+      box-shadow: -2px 0 16px rgba(0, 0, 0, 0.08);
+      z-index: 1000;
+      transform: translateX(100%);
+      transition: transform 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .monitor-detail-drawer.is-open {
+      transform: translateX(0);
+    }
+
+    .monitor-detail-drawer__header {
+      padding: 16px 20px;
+      border-bottom: 1px solid #e5e7eb;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .monitor-detail-drawer__title {
+      margin: 0;
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: #111827;
+    }
+
+    .monitor-detail-drawer__meta {
+      margin-top: 10px;
+      gap: 12px 16px;
+      font-size: 14px;
+      color: #6b7280;
+    }
+
+    .monitor-detail-section__title {
+      margin: 0 0 10px;
+      font-size: 14px;
+      color: #6b7280;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .monitor-detail-info-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 14px;
+      background: #f9fafb;
+      border-radius: 6px;
+      font-size: 15px;
+    }
+
+    .monitor-detail-info-label {
+      color: #1f2937;
+      font-size: 15px;
+    }
+
+    .monitor-detail-info-value {
+      color: #111827;
+      font-weight: 500;
+      font-size: 16px;
+    }
+
+    .monitor-drawer-btn {
+      flex: 1;
+      min-height: 46px;
+      padding: 11px 16px;
+      border: none;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .monitor-detail-drawer__close {
+      width: 36px;
+      height: 36px;
+      flex-shrink: 0;
+      border: none;
+      background: #bfb9b9;
+      color: #ffffff;
+      border-radius: 50%;
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+      padding: 0;
+      transition: background 0.15s ease, color 0.15s ease;
+    }
+
+    .monitor-detail-drawer__close:hover {
+      background: #a9a2a2;
+      color: #ffffff;
+    }
+
+    .monitor-detail-drawer__close svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    .monitor-detail-drawer__content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px;
+    }
+
+    .monitor-detail-section {
+      margin-bottom: 18px;
+    }
+
+    .monitor-detail-section__title {
+      margin: 0 0 10px;
+      font-size: 14px;
+      color: #6b7280;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .monitor-detail-info {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .monitor-detail-info-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 14px;
+      background: #f9fafb;
+      border-radius: 6px;
+      font-size: 15px;
+    }
+
+    .monitor-detail-info-label {
+      color: #1f2937;
+      font-size: 15px;
+    }
+
+    .monitor-detail-info-value {
+      color: #111827;
+      font-weight: 500;
+      font-size: 16px;
+    }
+
+    .monitor-detail-drawer__footer {
+      padding: 22px 12px 0;
+      border-top: 1px solid #f3f4f6;
+      display: flex;
+      gap: clamp(16px, 4vw, 28px);
+    }
+
+    .monitor-drawer-btn {
+      flex: 0 1 38%;
+      width: 38%;
+      min-width: 108px;
+      min-height: 46px;
+      padding: 11px 16px;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .monitor-drawer-btn--secondary {
+      background: #e5e7eb;
+      color: #374151;
+    }
+
+    .monitor-drawer-btn--secondary:hover {
+      background: #d1d5db;
+    }
+
+    .monitor-drawer-btn--primary {
+      background: #2e8b63;
+      color: #ffffff;
+    }
+
+    .monitor-drawer-btn--primary:hover {
+      background: #1f6241;
+    }
+
+    @media (max-width: 1200px) {
+      .monitor-grid {
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      }
+
+      .monitor-kpi-container {
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      }
+    }
+
+    @media (max-width: 768px) {
+      .monitor-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .monitor-filters {
+        flex-direction: column;
+      }
+
+      .monitor-filter-group {
+        width: 100%;
+      }
+
+      .monitor-filter-input,
+      .monitor-filter-btn {
+        width: 100%;
+      }
+
+      .monitor-detail-drawer {
+        max-width: 100%;
+      }
+
+      .monitor-kpi-container {
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-layout">
+    <!-- Sidebar -->
+    <aside class="sidebar sidebar--merged" aria-label="Main navigation">
+      <div class="sidebar-shell">
+        <div class="sidebar-primary">
+          <div class="sb-logo-wrap">
+            <a href="station.html" class="sb-logo logo-container" aria-label="changeon home">
+              <svg class="sb-logo__svg" width="100" height="100" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <rect class="sb-logo__frame" x="13" y="13" width="74" height="74" rx="14" stroke="#4ade80" stroke-width="5"/>
+                <rect x="36" y="27" width="7" height="14" rx="2" fill="#4ade80"/>
+                <rect x="57" y="27" width="7" height="14" rx="2" fill="#4ade80"/>
+                <path d="M34 44C34 42.8954 34.8954 42 36 42H64C65.1046 42 66 42.8954 66 44V55C66 60.5228 61.5228 65 56 65H44C38.4772 65 34 60.5228 34 55V44Z" fill="#4ade80"/>
+                <rect x="46" y="64" width="8" height="13" rx="2" fill="#4ade80"/>
+                <path d="M51 48L46 54H50L49 59L54 53H50L51 48Z" fill="#1a222e"/>
+              </svg>
+              <div class="text-logo">changeon</div>
+            </a>
+          </div>
+          <div class="sb-primary-spacer" aria-hidden="true"></div>
+          <button type="button" class="avatar-btn" title="Account" aria-label="User profile">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <defs>
+                <clipPath id="clipAvatarMonitor">
+                  <circle cx="12" cy="12" r="10"/>
+                </clipPath>
+              </defs>
+              <g clip-path="url(#clipAvatarMonitor)">
+                <rect width="24" height="24" fill="white"/>
+                <circle cx="12" cy="9" r="3" fill="#777"/>
+                <path d="M2 22c3-5 6-7 10-7s7 2 10 7H2z" fill="#777"/>
+              </g>
+              <circle cx="12" cy="12" r="10" stroke="#777" stroke-width="2" fill="none"/>
+            </svg>
+          </button>
+        </div>
+
+        <nav class="sidebar-secondary" aria-label="Section navigation">
+          <div class="sb-secondary-panel is-active" data-panel="station">
+            <div class="sb-sec-group">
+              <h3 class="sb-sec-title">General</h3>
+              <a href="station.html" class="sb-sec-link">Station</a>
+              <a href="poles.html" class="sb-sec-link">Pole</a>
+            </div>
+            <div class="sb-sec-group">
+              <h3 class="sb-sec-title">Manage</h3>
+              <a href="monitor.html" class="sb-sec-link is-active" aria-current="page">Monitor</a>
+              <a href="history.html" class="sb-sec-link">History</a>
+            </div>
+          </div>
+        </nav>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <header class="topbar">
+        <div class="topbar__left">
+          <h1 class="page-title">
+            <span class="page-title__base">EVC Management</span>
+            <span class="page-title__sep" aria-hidden="true"> &gt; </span>
+            <span id="pageTitleCurrent" class="page-title__current">Monitor</span>
+          </h1>
+        </div>
+        <div class="topbar__actions">
+          <button type="button" id="notifToggle" class="bell-toggle" aria-label="Notifications" aria-pressed="false">
+            <span class="bell-toggle__icon" aria-hidden="true">
+              <svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="1" y="1" width="62" height="62" rx="16" fill="#D8F2DF"/>
+                <path d="M32 20C28.134 20 25 23.134 25 27V29.712C25 30.534 24.734 31.334 24.242 31.994L22.803 33.921C21.694 35.406 22.754 37.5 24.607 37.5H39.393C41.246 37.5 42.306 35.406 41.197 33.921L39.758 31.994C39.266 31.334 39 30.534 39 29.712V27C39 23.134 35.866 20 32 20Z" fill="currentColor"/>
+                <path d="M28.5 39.25C29.123 41.109 30.268 42 32 42C33.732 42 34.877 41.109 35.5 39.25H28.5Z" fill="currentColor"/>
+              </svg>
+            </span>
+            <span class="bell-badge is-hidden" aria-live="polite">0</span>
+          </button>
+        </div>
+      </header>
+
+      <section class="card monitor-view">
+        <!-- Hero Section -->
+        <div class="monitor-hero">
+          <div>
+            <h2 class="monitor-hero__title">Monitor Status</h2>
+            <p class="monitor-hero__desc">Track the live status of charging stations and connectors across the network.</p>
+          </div>
+        </div>
+
+        <!-- KPI Cards -->
+        <div class="monitor-kpi-container">
+          <div class="monitor-kpi-card monitor-kpi-card--online">
+            <div class="monitor-kpi-card__label">Online Stations</div>
+            <p class="monitor-kpi-card__value" id="monitorOnlineCount">0</p>
+            <div class="monitor-kpi-card__subtext">Connected</div>
+          </div>
+          <div class="monitor-kpi-card monitor-kpi-card--offline">
+            <div class="monitor-kpi-card__label">Offline Stations</div>
+            <p class="monitor-kpi-card__value" id="monitorOfflineCount">0</p>
+            <div class="monitor-kpi-card__subtext">Disconnected</div>
+          </div>
+          <div class="monitor-kpi-card monitor-kpi-card--online">
+            <div class="monitor-kpi-card__label">Idle Connectors</div>
+            <p class="monitor-kpi-card__value" id="monitorIdleCount">0</p>
+            <div class="monitor-kpi-card__subtext">Available</div>
+          </div>
+          <div class="monitor-kpi-card">
+            <div class="monitor-kpi-card__label">Charging Connectors</div>
+            <p class="monitor-kpi-card__value" id="monitorChargingCount">0</p>
+            <div class="monitor-kpi-card__subtext">In Use</div>
+          </div>
+          <div class="monitor-kpi-card monitor-kpi-card--warning">
+            <div class="monitor-kpi-card__label">Alerts</div>
+            <p class="monitor-kpi-card__value" id="monitorErrorCount">0</p>
+            <div class="monitor-kpi-card__subtext">Needs Action</div>
+          </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="monitor-filters">
+          <div class="monitor-filter-group">
+            <label class="monitor-filter-label">Station:</label>
+            <input type="text" id="stationFilter" class="monitor-filter-input" placeholder="Search station...">
+          </div>
+          <div class="monitor-filter-group">
+            <label class="monitor-filter-label">Region:</label>
+            <select id="areaFilter" class="monitor-filter-input">
+              <option value="">All</option>
+              <option value="north">North</option>
+              <option value="central">Central</option>
+              <option value="south">South</option>
+            </select>
+          </div>
+          <div class="monitor-filter-group">
+            <label class="monitor-filter-label">Status:</label>
+            <select id="statusFilter" class="monitor-filter-input">
+              <option value="">All</option>
+              <option value="online">Online</option>
+              <option value="offline">Offline</option>
+            </select>
+          </div>
+          <button id="resetFiltersBtn" class="monitor-filter-btn">Reset</button>
+        </div>
+
+        <!-- Station Grid -->
+        <div class="monitor-grid" id="monitorGrid">
+          <!-- Station cards will be injected here -->
+        </div>
+
+        <div id="monitorPagination" class="monitor-pagination is-hidden" aria-label="Station list pagination">
+          <div class="monitor-pagination__pager">
+            <button type="button" id="monitorPagePrev" class="monitor-pager-nav" aria-label="Previous page">
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+            <div id="monitorPageNumbers" class="monitor-pagination__numbers" role="navigation" aria-label="Pages"></div>
+            <button type="button" id="monitorPageNext" class="monitor-pager-nav" aria-label="Next page">
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Empty State -->
+        <div id="monitorEmpty" class="monitor-empty is-hidden">
+          <p class="monitor-empty__text">No data available</p>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Detail Drawer Overlay -->
+  <div id="monitorDetailOverlay" class="monitor-detail-overlay"></div>
+
+  <!-- Detail Drawer -->
+  <div id="monitorDetailDrawer" class="monitor-detail-drawer">
+    <div class="monitor-detail-drawer__header">
+      <h3 class="monitor-detail-drawer__title" id="detailStationName"></h3>
+      <button class="monitor-detail-drawer__close" id="monitorDetailClose" aria-label="Return details">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path d="M5 5L19 19" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"/>
+          <path d="M19 5L5 19" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"/>
+        </svg>
+      </button>
+    </div>
+    <div class="monitor-detail-drawer__content">
+      <div class="monitor-detail-section">
+        <div class="monitor-detail-section__title">Station Information</div>
+        <div class="monitor-detail-info">
+          <div class="monitor-detail-info-item">
+            <span class="monitor-detail-info-label">ID:</span>
+            <span class="monitor-detail-info-value" id="detailStationId"></span>
+          </div>
+          <div class="monitor-detail-info-item">
+            <span class="monitor-detail-info-label">Address:</span>
+            <span class="monitor-detail-info-value" id="detailStationAddress"></span>
+          </div>
+          <div class="monitor-detail-info-item">
+            <span class="monitor-detail-info-label">Region:</span>
+            <span class="monitor-detail-info-value" id="detailStationArea"></span>
+          </div>
+          <div class="monitor-detail-info-item">
+            <span class="monitor-detail-info-label">Status:</span>
+            <span class="monitor-detail-info-value" id="detailStationStatus"></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="monitor-detail-section">
+        <div class="monitor-detail-section__title">Connectors</div>
+        <div id="detailConnectorsList" class="monitor-detail-info">
+          <!-- Connectors will be injected here -->
+        </div>
+      </div>
+
+      <div class="monitor-detail-section">
+        <div class="monitor-detail-section__title">Statistics</div>
+        <div class="monitor-detail-info">
+          <div class="monitor-detail-info-item">
+            <span class="monitor-detail-info-label">Total sessions:</span>
+            <span class="monitor-detail-info-value" id="detailTotalSessions">0</span>
+          </div>
+          <div class="monitor-detail-info-item">
+            <span class="monitor-detail-info-label">Delivered energy:</span>
+            <span class="monitor-detail-info-value" id="detailTotalEnergy">0 kWh</span>
+          </div>
+          <div class="monitor-detail-info-item">
+            <span class="monitor-detail-info-label">Uptime:</span>
+            <span class="monitor-detail-info-value" id="detailUptimePercentage">0%</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="monitor-detail-drawer__footer">
+      <button id="monitorDetailCloseBtn" class="monitor-drawer-btn monitor-drawer-btn--secondary">Return</button>
+    </div>
+  </div>
+
+  <script src="./js/common.js"></script>
+  <script src="./js/evcs-config.js"></script>
+  <script src="./js/pages/alerts-store.js"></script>
+  <script src="./js/pages/monitor.js"></script>
+</body>
+</html>

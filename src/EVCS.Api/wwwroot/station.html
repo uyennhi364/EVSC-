@@ -1,0 +1,1635 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Station Management</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
+  <link rel="stylesheet" href="./css/style.css">
+
+  <style>
+    .th-filter-btn {
+      background: none;
+      border: none;
+      width: 32px;
+      height: 32px;
+      padding: 0;
+      cursor: pointer;
+      border-radius: 6px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+    }
+
+    .th-filter-btn:hover {
+      background-color: rgba(0, 0, 0, 0.08);
+    }
+
+    .th-filter-btn[aria-expanded="true"],
+    .th-filter-btn.active,
+    .th-filter-btn.is-active {
+      background-color: #2e8b63;
+      color: #fff;
+    }
+
+    .th-filter-btn[aria-expanded="true"] .th-filter-icon,
+    .th-filter-btn.active .th-filter-icon,
+    .th-filter-btn.is-active .th-filter-icon {
+      fill: #fff;
+    }
+
+    #latCalendarBtn[aria-expanded="true"],
+    #latCalendarBtn.active,
+    #latCalendarBtn.is-active,
+    #lonCalendarBtn[aria-expanded="true"],
+    #lonCalendarBtn.active,
+    #lonCalendarBtn.is-active {
+      background-color: transparent;
+      color: inherit;
+    }
+
+    #latCalendarBtn[aria-expanded="true"] .th-filter-icon,
+    #latCalendarBtn.active .th-filter-icon,
+    #latCalendarBtn.is-active .th-filter-icon,
+    #lonCalendarBtn[aria-expanded="true"] .th-filter-icon,
+    #lonCalendarBtn.active .th-filter-icon,
+    #lonCalendarBtn.is-active .th-filter-icon {
+      fill: currentColor;
+    }
+
+    /* Hide coordinate calendar popover while preserving the filter buttons */
+    #coordCalendarPopover {
+      display: none !important;
+    }
+
+    /* Status Popover - giống style của coord-calendar-popover */
+    .status-popover {
+      position: fixed;
+      z-index: 9999;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+      padding: 0;
+      min-width: 200px;
+      display: none;
+    }
+
+    .status-popover[aria-hidden="false"] {
+      display: block;
+    }
+
+    .status-popover__list {
+      list-style: none;
+      margin: 0;
+      padding: 8px 0;
+    }
+
+    .status-popover__item {
+      padding: 12px 20px;
+      cursor: pointer;
+      font-size: 14px;
+      color: #333;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transition: background-color 0.15s ease;
+    }
+
+    .status-popover__item:hover {
+      background-color: #f5f5f5;
+    }
+
+    .status-popover__item.active {
+      background-color: #e6f7e6;
+      color: #2e7d32;
+      font-weight: 500;
+    }
+
+    .status-popover__item.active::before {
+      content: '';
+      width: 8px;
+      height: 8px;
+      background-color: #4ade80;
+      border-radius: 50%;
+    }
+
+    .detail-close-btn {
+      width: 52px;
+      height: 52px;
+      border: none;
+      border-radius: 50%;
+      background: #e5e7eb;
+      color: #4b5563;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: background-color 0.2s ease, color 0.2s ease;
+    }
+
+    .detail-close-btn:hover {
+      background: #dbe0e6;
+      color: #374151;
+    }
+
+    .pole-confirm-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 10000;
+      background: rgba(0, 0, 0, 0.35);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .pole-confirm-overlay.is-open {
+      display: flex;
+    }
+
+    .pole-confirm-modal {
+      width: 100%;
+      max-width: 420px;
+      background: #ffffff;
+      border-radius: 16px;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+      padding: 28px 24px;
+      text-align: center;
+    }
+
+    .pole-confirm-modal__icon {
+      width: 64px;
+      height: 64px;
+      margin: 0 auto 18px;
+      border-radius: 50%;
+      background: #fff4e5;
+      color: #f59e0b;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 30px;
+      font-weight: 700;
+    }
+
+    .pole-confirm-modal__title {
+      margin: 0 0 12px;
+      color: #1f2937;
+      font-size: 24px;
+      text-align: center;
+    }
+
+    .pole-confirm-modal__message {
+      margin: 0 0 24px;
+      color: #6b7280;
+      font-size: 15px;
+      line-height: 1.6;
+    }
+
+    .pole-confirm-modal__message--center {
+      text-align: center;
+    }
+
+    .pole-confirm-modal__actions {
+      display: flex;
+      gap: 12px;
+    }
+
+    .pole-confirm-modal__btn {
+      flex: 1;
+      min-height: 44px;
+      border: none;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+    }
+
+    .pole-confirm-modal__btn--secondary {
+      background: #e5e7eb;
+      color: #374151;
+    }
+
+    .pole-confirm-modal__btn--secondary:hover {
+      background: #d1d5db;
+    }
+
+    .pole-confirm-modal__btn--danger {
+      background: #dc2626;
+      color: #ffffff;
+    }
+
+    .pole-confirm-modal__btn--danger:hover {
+      background: #b91c1c;
+    }
+
+    .pole-confirm-modal--deactivate {
+      max-width: 420px;
+    }
+
+    .history-view {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      background: transparent;
+      border: none;
+      padding: 0;
+    }
+
+    .history-hero,
+    .history-filters,
+    .history-grid,
+    .history-table-card {
+      background: #ffffff;
+      border: 1px solid #e5e7eb;
+      border-radius: 14px;
+    }
+
+    .history-hero {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 18px 20px;
+    }
+
+    .history-hero__title {
+      margin: 0 0 6px;
+      font-size: 24px;
+      color: #111827;
+    }
+
+    .history-hero__desc {
+      margin: 0;
+      color: #6b7280;
+      font-size: 14px;
+      line-height: 1.6;
+      max-width: 760px;
+    }
+
+    .history-export {
+      position: relative;
+      display: inline-flex;
+      justify-content: flex-end;
+    }
+
+    .history-export__trigger {
+      min-width: 146px;
+      background: #1f8f46;
+      color: #ffffff;
+      border: 1px solid #1f8f46;
+      border-radius: 12px;
+      padding: 12px 18px;
+      font-size: 15px;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 6px 16px rgba(31, 143, 70, 0.18);
+    }
+
+    .history-export__trigger:hover {
+      background: #18753a;
+      border-color: #18753a;
+    }
+
+    .history-export__icon {
+      width: 24px;
+      height: 24px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      line-height: 1;
+    }
+
+    .history-export__menu {
+      position: absolute;
+      top: calc(100% + 10px);
+      right: 0;
+      min-width: 180px;
+      padding: 8px;
+      background: #ffffff;
+      border: 1px solid #d1d5db;
+      border-radius: 12px;
+      box-shadow: 0 16px 32px rgba(15, 23, 42, 0.14);
+      display: none;
+      flex-direction: column;
+      gap: 4px;
+      z-index: 20;
+    }
+
+    .history-export.is-open .history-export__menu {
+      display: flex;
+    }
+
+    .history-export__option {
+      width: 100%;
+      background: #ffffff;
+      color: #111827;
+      border: none;
+      border-radius: 10px;
+      padding: 10px 12px;
+      font-size: 14px;
+      font-weight: 600;
+      text-align: left;
+    }
+
+    .history-export__option:hover {
+      background: #f3f4f6;
+    }
+
+    .history-export__feedback {
+      display: none;
+      margin: 0 20px;
+      padding: 14px 16px;
+      background: #effaf3;
+      color: #166534;
+      border: 1px solid #b7efcb;
+      border-radius: 12px;
+      font-size: 14px;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .history-export__feedback.is-visible {
+      display: flex;
+    }
+
+    .history-export__feedback a {
+      color: #0f8a4b;
+      font-weight: 700;
+      text-decoration: none;
+    }
+
+    .history-export__feedback a:hover {
+      text-decoration: underline;
+    }
+
+    .history-filters {
+      padding: 18px 20px;
+    }
+
+    .history-filters__title {
+      margin: 0 0 14px;
+      font-size: 16px;
+      color: #111827;
+    }
+
+    .history-filters__grid {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(150px, 1fr));
+      gap: 14px;
+    }
+
+    .history-field label {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #4b5563;
+    }
+
+    .history-field select,
+    .history-field input {
+      width: 100%;
+      min-height: 44px;
+      border: 1px solid #d1d5db;
+      border-radius: 10px;
+      background: #ffffff;
+      padding: 10px 12px;
+      color: #111827;
+      font-size: 14px;
+    }
+
+    .history-date-trigger {
+      width: 100%;
+      min-height: 44px;
+      border: 1px solid #d1d5db;
+      border-radius: 10px;
+      background: #ffffff;
+      padding: 10px 12px;
+      color: #111827;
+      font-size: 14px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      text-align: left;
+    }
+
+    .history-date-trigger:hover {
+      border-color: #b7c0cb;
+      background: #f9fafb;
+    }
+
+    .history-date-trigger.is-active {
+      border-color: #24965d;
+      box-shadow: 0 0 0 3px rgba(36, 150, 93, 0.12);
+    }
+
+    .history-date-trigger__text {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .history-date-trigger__icon {
+      color: #24965d;
+      font-size: 16px;
+      line-height: 1;
+      flex-shrink: 0;
+    }
+
+    .sidebar--merged {
+      width: 214px;
+    }
+
+    .sidebar--merged .sidebar-shell {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      padding-bottom: 92px;
+      background: #ffffff;
+    }
+
+    .sidebar--merged .sidebar-primary {
+      width: 100%;
+      background: #ffffff;
+      padding: 18px 18px 0;
+      border-right: 0;
+      height: auto;
+      min-height: auto;
+      max-height: none;
+      align-items: flex-start;
+    }
+
+    .sidebar--merged .sb-logo-wrap {
+      margin-bottom: 0;
+      align-items: flex-start;
+      align-self: flex-start;
+    }
+
+    .sidebar--merged .sb-icon-menu {
+      display: none;
+    }
+
+    .sidebar--merged .sb-primary-spacer {
+      display: none;
+    }
+
+    .sidebar--merged .sidebar-secondary {
+      width: 100%;
+      border-left: 0;
+      padding-top: 10px;
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .sidebar--merged .sb-secondary-panel {
+      display: none;
+    }
+
+    .sidebar--merged .sb-secondary-panel[data-panel="station"] {
+      display: block;
+      background: #ffffff;
+      min-height: auto;
+      padding-top: 0;
+    }
+
+    .sidebar--merged .sb-sec-group {
+      margin-bottom: 28px;
+    }
+
+    .sidebar--merged .sb-sec-title {
+      padding: 0 18px;
+      margin-bottom: 12px;
+    }
+
+    .sidebar--merged .sb-sec-link {
+      padding: 12px 18px;
+      border-radius: 12px;
+    }
+
+    .sidebar--merged .sb-sec-link.is-active {
+      background: #e6f7e9;
+    }
+
+    .sidebar--merged .avatar-btn {
+      position: absolute;
+      left: 18px;
+      bottom: 18px;
+    }
+
+    .history-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.2fr) minmax(280px, 0.8fr);
+      gap: 0;
+      overflow: hidden;
+    }
+
+    .history-panel {
+      padding: 20px;
+      border-right: 1px solid #e5e7eb;
+    }
+
+    .history-panel:last-child {
+      border-right: none;
+    }
+
+    .history-panel__title {
+      margin: 0 0 6px;
+      font-size: 16px;
+      color: #111827;
+    }
+
+    .history-panel__desc {
+      margin: 0 0 18px;
+      font-size: 13px;
+      color: #6b7280;
+    }
+
+    .history-chart {
+      display: flex;
+      align-items: flex-end;
+      gap: 14px;
+      min-height: 240px;
+    }
+
+    .history-chart__bar {
+      flex: 1;
+      min-width: 44px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .history-chart__value {
+      font-size: 12px;
+      font-weight: 700;
+      color: #0f8a4b;
+    }
+
+    .history-chart__column {
+      width: 100%;
+      border-radius: 12px 12px 6px 6px;
+      background: linear-gradient(180deg, #4ade80 0%, #16a34a 100%);
+      min-height: 18px;
+      box-shadow: inset 0 -1px 0 rgba(255,255,255,0.25);
+    }
+
+    .history-chart__label {
+      font-size: 12px;
+      color: #6b7280;
+      text-align: center;
+    }
+
+    .history-summary {
+      display: grid;
+      gap: 12px;
+    }
+
+    .history-metric {
+      padding: 14px 16px;
+      background: #f8fafc;
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+    }
+
+    .history-metric__label {
+      display: block;
+      font-size: 12px;
+      color: #6b7280;
+      margin-bottom: 8px;
+    }
+
+    .history-metric__value {
+      font-size: 24px;
+      font-weight: 700;
+      color: #111827;
+    }
+
+    .history-table-card {
+      padding: 18px 20px 20px;
+    }
+
+    .history-table-card__head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .history-table-card__title {
+      margin: 0;
+      font-size: 18px;
+      color: #111827;
+    }
+
+    .history-table-wrap {
+      overflow-x: auto;
+    }
+
+    .history-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+    }
+
+    .history-table th,
+    .history-table td {
+      padding: 14px 12px;
+      text-align: left;
+      font-size: 14px;
+      border-bottom: 1px solid #eef2f7;
+      background: #ffffff;
+    }
+
+    .history-table th {
+      font-size: 13px;
+      color: #6b7280;
+      font-weight: 700;
+    }
+
+    .history-table tbody tr:hover td {
+      background: #f8fafc;
+    }
+
+    .history-session-status {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 96px;
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      border: 1px solid transparent;
+    }
+
+    .history-session-status--completed {
+      background: #ecfdf3;
+      color: #166534;
+      border-color: #bbf7d0;
+    }
+
+    .history-session-status--interrupted {
+      background: #fff7ed;
+      color: #b45309;
+      border-color: #fed7aa;
+    }
+
+    .history-session-status--cancelled {
+      background: #fff7ed;
+      color: #b45309;
+      border-color: #fed7aa;
+    }
+
+    .history-session-status--ongoing {
+      background: #eff6ff;
+      color: #1d4ed8;
+      border-color: #bfdbfe;
+    }
+
+    .history-session-status--failed {
+      background: #fef2f2;
+      color: #b91c1c;
+      border-color: #fecaca;
+    }
+
+    .history-detail-btn {
+      background: #eef2ff;
+      color: #4338ca;
+      border: 1px solid #c7d2fe;
+      border-radius: 10px;
+      padding: 8px 12px;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .history-empty {
+      display: none;
+      margin-top: 14px;
+      padding: 32px 16px;
+      text-align: center;
+      border: 1px dashed #d1d5db;
+      border-radius: 12px;
+      color: #6b7280;
+      background: #f9fafb;
+    }
+
+    .history-empty.is-visible {
+      display: block;
+    }
+
+    .history-detail-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 10002;
+      background: rgba(15, 23, 42, 0.36);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .history-detail-overlay.is-open {
+      display: flex;
+    }
+
+    .history-detail-modal {
+      width: min(640px, calc(100vw - 40px));
+      background: #ffffff;
+      border-radius: 16px;
+      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.2);
+      padding: 24px;
+    }
+
+    .history-detail-modal__header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+
+    .history-detail-modal__title {
+      margin: 0;
+      font-size: 22px;
+      color: #111827;
+    }
+
+    .history-detail-modal__close {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: #f3f4f6;
+      color: #4b5563;
+      padding: 0;
+    }
+
+    .history-detail-modal__grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .history-detail-item {
+      padding: 14px;
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      background: #f8fafc;
+    }
+
+    .history-detail-item.full {
+      grid-column: 1 / -1;
+    }
+
+    .history-detail-item__label {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 12px;
+      color: #6b7280;
+    }
+
+    .history-detail-item__value {
+      font-size: 15px;
+      color: #111827;
+      font-weight: 600;
+    }
+
+    @media (max-width: 1024px) {
+      .history-filters__grid {
+        grid-template-columns: repeat(3, minmax(150px, 1fr));
+      }
+
+      .history-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .history-panel {
+        border-right: none;
+        border-bottom: 1px solid #e5e7eb;
+      }
+
+      .history-panel:last-child {
+        border-bottom: none;
+      }
+    }
+
+    @media (max-width: 720px) {
+      .history-hero {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .history-export {
+        width: 100%;
+        justify-content: flex-start;
+      }
+
+      .history-filters__grid {
+        grid-template-columns: 1fr;
+      }
+
+      .history-detail-modal__grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .station-toggle {
+      position: relative;
+      width: 64px;
+      height: 32px;
+      border: none;
+      border-radius: 999px;
+      background: #e5e7eb;
+      padding: 0 8px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+    }
+
+    .station-toggle__text {
+      position: relative;
+      z-index: 1;
+      font-size: 10px;
+      font-weight: 700;
+      line-height: 1;
+      color: #9ca3af;
+    }
+
+    .station-toggle__thumb {
+      position: absolute;
+      top: 4px;
+      left: 4px;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: #ffffff;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.16);
+      transition: transform 0.2s ease;
+    }
+
+    .station-toggle.is-on {
+      background: #22c55e;
+    }
+
+    .station-toggle.is-on .station-toggle__text--on {
+      color: #ffffff;
+    }
+
+    .station-toggle.is-on .station-toggle__text--off {
+      color: rgba(255, 255, 255, 0.7);
+    }
+
+    .station-toggle.is-on .station-toggle__thumb {
+      transform: translateX(32px);
+    }
+
+    .station-toggle:not(.is-on) .station-toggle__text--off {
+      color: #4b5563;
+    }
+
+  </style>
+</head>
+<body>
+  <div class="app-layout">
+    <aside class="sidebar sidebar--merged" id="appSidebar" aria-label="Main navigation">
+      <div class="sidebar-shell">
+        <!-- Cột 1: Primary — icon rail -->
+        <div class="sidebar-primary">
+          <div class="sb-logo-wrap">
+            <a href="#" class="sb-logo logo-container" aria-label="changeon home">
+              <svg class="sb-logo__svg" width="100" height="100" viewBox="0 0 100 100" fill="none" xmlns="[w3.org](http://www.w3.org/2000/svg)" aria-hidden="true" shape-rendering="geometricPrecision">
+                <rect class="sb-logo__frame" x="13" y="13" width="74" height="74" rx="14" stroke="#4ade80" stroke-width="5"/>
+                <rect x="36" y="27" width="7" height="14" rx="2" fill="#4ade80"/>
+                <rect x="57" y="27" width="7" height="14" rx="2" fill="#4ade80"/>
+                <path d="M34 44C34 42.8954 34.8954 42 36 42H64C65.1046 42 66 42.8954 66 44V55C66 60.5228 61.5228 65 56 65H44C38.4772 65 34 60.5228 34 55V44Z" fill="#4ade80"/>
+                <rect x="46" y="64" width="8" height="13" rx="2" fill="#4ade80"/>
+                <path d="M51 48L46 54H50L49 59L54 53H50L51 48Z" fill="#1a222e"/>
+              </svg>
+              <div class="text-logo">changeon</div>
+            </a>
+          </div>
+
+          <nav class="sb-icon-menu" aria-label="Icon navigation">
+            <div class="menu">
+              <!-- 1. Search -->
+              <button type="button" class="menu-item search" aria-label="Search" data-panel-target="search">
+                <svg width="23" height="23" viewBox="0 0 23 23" fill="none" xmlns="[w3.org](http://www.w3.org/2000/svg)" aria-hidden="true">
+                  <path d="M19.7456 19.7451L14.104 14.1035M2.8208 9.40217C2.8208 10.2665 2.99105 11.1224 3.32181 11.9209C3.65258 12.7195 4.1374 13.4451 4.74858 14.0562C5.35976 14.6674 6.08534 15.1522 6.88389 15.483C7.68244 15.8138 8.53832 15.984 9.40266 15.984C10.267 15.984 11.1229 15.8138 11.9214 15.483C12.72 15.1522 13.4456 14.6674 14.0567 14.0562C14.6679 13.4451 15.1527 12.7195 15.4835 11.9209C15.8143 11.1224 15.9845 10.2665 15.9845 9.40217C15.9845 8.53783 15.8143 7.68195 15.4835 6.8834C15.1527 6.08485 14.6679 5.35928 14.0567 4.74809C13.4456 4.13691 12.72 3.6521 11.9214 3.32133C11.1229 2.99056 10.267 2.82031 9.40266 2.82031C8.53832 2.82031 7.68244 2.99056 6.88389 3.32133C6.08534 3.6521 5.35976 4.13691 4.74858 4.74809C4.1374 5.35928 3.65258 6.08485 3.32181 6.8834C2.99105 7.68195 2.8208 8.53783 2.8208 9.40217Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </button>
+
+              <!-- 2. Printer -->
+              <button type="button" class="menu-item" aria-label="Printer" data-panel-target="printer">
+                <svg width="23" height="23" viewBox="0 0 23 23" fill="none" xmlns="[w3.org](http://www.w3.org/2000/svg)" aria-hidden="true">
+                  <path d="M19.125 9.27892H3.57825C2.89104 9.27892 2.23198 9.57011 1.74605 10.0884C1.26011 10.6068 0.987122 11.3098 0.987122 12.0428V21.7163H21.7162V12.0428C21.7162 11.3098 21.4432 10.6068 20.9572 10.0884C20.4713 9.57011 19.8122 9.27892 19.125 9.27892ZM19.125 14.8067H13.9428V12.0428H19.125M17.8295 7.89698H4.87382V0.987305H17.8295V7.89698Z" fill="currentColor"/>
+                </svg>
+              </button>
+
+              <!-- 3. User List -->
+              <button type="button" class="menu-item" aria-label="Users" data-panel-target="users">
+                <svg width="23" height="23" viewBox="0 0 24 24" xmlns="[w3.org](http://www.w3.org/2000/svg)" aria-hidden="true">
+                  <circle cx="7.5" cy="7.5" r="3.4" fill="currentColor"/>
+                  <path d="M1.8 18.8C2.5 16 4.8 14 7.5 14C10.2 14 12.5 16 13.2 18.8H1.8Z" fill="currentColor"/>
+                  <rect x="14.5" y="5.5" width="7" height="2.2" rx="1.1" fill="currentColor"/>
+                  <rect x="14.5" y="10.4" width="7" height="2.2" rx="1.1" fill="currentColor"/>
+                  <rect x="14.5" y="15.3" width="5.5" height="2.2" rx="1.1" fill="currentColor"/>
+                </svg>
+              </button>
+
+              <!-- 4. Charging Station (active) -->
+              <button type="button" class="menu-item active" aria-label="Charging station" data-panel-target="station">
+                <svg width="23" height="23" viewBox="0 0 23 23" fill="none" xmlns="[w3.org](http://www.w3.org/2000/svg)" aria-hidden="true">
+                  <path d="M3.29035 9.19703H10.2V3.43897H3.29035V9.19703ZM0.987122 21.8648V3.43897C0.987122 2.80558 1.21284 2.26356 1.66427 1.81289C2.1157 1.36223 2.65773 1.13651 3.29035 1.13574H10.2C10.8334 1.13574 11.3758 1.36146 11.8273 1.81289C12.2787 2.26432 12.504 2.80635 12.5033 3.43897V11.5003H13.9428C14.4994 11.5003 14.9746 11.6972 15.3685 12.091C15.7623 12.4849 15.9589 12.9597 15.9581 13.5156V18.8418C15.9581 19.1681 16.0924 19.4656 16.3612 19.7343C16.6299 20.003 16.9274 20.1374 17.2537 20.1374C17.5991 20.1374 17.9016 20.003 18.1611 19.7343C18.4206 19.4656 18.55 19.1681 18.5492 18.8418V8.04542H18.2613C17.935 8.04542 17.6617 7.93486 17.4414 7.71376C17.221 7.49265 17.1105 7.21933 17.1097 6.89381V4.59058H17.6855V2.86316H18.8371V4.59058H19.9887V2.86316H21.1403V4.59058H21.7162V6.89381C21.7162 7.2201 21.6056 7.4938 21.3845 7.71491C21.1634 7.93602 20.8901 8.04619 20.5645 8.04542H20.2766V18.8418C20.2766 19.6479 19.9837 20.3535 19.398 20.9585C18.8122 21.5634 18.0978 21.8655 17.2548 21.8648C16.4295 21.8648 15.7193 21.5623 15.1243 20.9573C14.5293 20.3523 14.2318 19.6472 14.2318 18.8418V13.5156C14.2318 13.4196 14.208 13.3478 14.1604 13.3002C14.1128 13.2526 14.0407 13.2284 13.9439 13.2277H12.5033V21.8648H0.987122ZM6.16938 19.5616L9.04841 14.9551H7.32099V11.5003L4.44196 16.1067H6.16938V19.5616Z" fill="currentColor"/>
+                </svg>
+              </button>
+
+              <!-- 5. Briefcase -->
+              <button type="button" class="menu-item" aria-label="Briefcase" data-panel-target="briefcase">
+                <svg width="23" height="23" viewBox="0 0 23 23" fill="none" xmlns="[w3.org](http://www.w3.org/2000/svg)" aria-hidden="true">
+                  <path d="M14.0338 17.5H17.0338V20.5H14.0338V17.5ZM19.2838 17.5H22.2838V20.5H19.2838V17.5ZM14.0338 12.25H17.0338V15.25H14.0338V12.25ZM19.2838 12.25H22.2838V15.25H19.2838V12.25Z" fill="currentColor"/>
+                  <path d="M12.5338 17.5H2.78381V7H20.7838V10.75H22.2838V7C22.2838 6.60218 22.1258 6.22064 21.8445 5.93934C21.5632 5.65804 21.1816 5.5 20.7838 5.5H16.2838V2.5C16.2838 2.10218 16.1258 1.72064 15.8445 1.43934C15.5632 1.15804 15.1816 1 14.7838 1H8.78381C8.38599 1 8.00446 1.15804 7.72315 1.43934C7.44185 1.72064 7.28381 2.10218 7.28381 2.5V5.5H2.78381C2.38599 5.5 2.00446 5.65804 1.72315 5.93934C1.44185 6.22064 1.28381 6.60218 1.28381 7V17.5C1.28381 17.8978 1.44185 18.2794 1.72315 18.5607C2.00446 18.842 2.38599 19 2.78381 19H12.5338V17.5ZM8.78381 2.5H14.7838V5.5H8.78381V2.5Z" fill="currentColor"/>
+                </svg>
+              </button>
+
+              <!-- 6. Bus Charger -->
+              <button type="button" class="menu-item" aria-label="Bus charger" data-panel-target="bus">
+                <svg width="23" height="23" viewBox="0 0 23 23" fill="none" xmlns="[w3.org](http://www.w3.org/2000/svg)" aria-hidden="true">
+                  <path d="M16.0403 1.92953C16.0403 1.67964 16.1443 1.43998 16.3294 1.26328C16.5145 1.08657 16.7656 0.987305 17.0274 0.987305H20.729C20.9908 0.987305 21.2419 1.08657 21.427 1.26328C21.6121 1.43998 21.7161 1.67964 21.7161 1.92953V6.64068C21.7161 6.89057 21.6121 7.13023 21.427 7.30693C21.2419 7.48364 20.9908 7.58291 20.729 7.58291H19.7419V21.0097C19.7419 21.1971 19.6639 21.3768 19.5251 21.5094C19.3863 21.6419 19.1979 21.7163 19.0016 21.7163C18.8053 21.7163 18.617 21.6419 18.4781 21.5094C18.3393 21.3768 18.2613 21.1971 18.2613 21.0097V7.58291H17.0274C16.7656 7.58291 16.5145 7.48364 16.3294 7.30693C16.1443 7.13023 16.0403 6.89057 16.0403 6.64068V1.92953ZM14.609 2.87176C14.7591 2.87176 14.9071 2.8815 15.0532 2.90097V4.34164C14.9082 4.30529 14.759 4.28661 14.609 4.28605H7.10807C6.72273 4.28602 6.34844 4.40898 6.04474 4.63537C5.74103 4.86176 5.52534 5.17858 5.43198 5.53544L4.6502 8.52513H17.2742V17.4763H16.2861L16.2871 18.6513C16.2871 18.7813 16.3976 18.8868 16.5339 18.8868H17.2742V20.3002H16.5339C16.0757 20.3002 15.6363 20.1264 15.3124 19.8172C14.9884 19.508 14.8064 19.0886 14.8064 18.6513L14.8055 17.4763H6.91361V18.6513C6.91361 19.0886 6.73162 19.508 6.40767 19.8172C6.08371 20.1264 5.64434 20.3002 5.1862 20.3002H3.7016C3.24346 20.3002 2.80409 20.1264 2.48013 19.8172C2.15618 19.508 1.97418 19.0886 1.97418 18.6513V10.6451C1.97418 9.87723 2.40159 9.20448 3.04222 8.83324L3.24655 8.05402H2.7145C2.53561 8.05401 2.36276 7.99217 2.22793 7.87993C2.09311 7.76768 2.00542 7.61264 1.98109 7.44346L1.97418 7.34735C1.97419 7.17658 2.03898 7.01159 2.15657 6.8829C2.27415 6.7542 2.43658 6.6705 2.61382 6.64727L2.7145 6.64068H3.61572L3.99674 5.19153C4.17022 4.52895 4.57076 3.94073 5.13469 3.52041C5.69863 3.10008 6.39357 2.87177 7.10906 2.87176H14.609ZM5.43198 17.4763H3.45384L3.45483 18.6513C3.45483 18.7813 3.56538 18.8868 3.7016 18.8868H5.1862C5.25164 18.8868 5.31441 18.862 5.36069 18.8178C5.40697 18.7737 5.43297 18.7137 5.43297 18.6513L5.43198 17.4763ZM12.5855 13.2363H9.12866L9.02798 13.2429C8.85078 13.2661 8.6884 13.3499 8.57086 13.4786C8.45332 13.6073 8.38856 13.7722 8.38856 13.943C8.38856 14.1137 8.45332 14.2786 8.57086 14.4073C8.6884 14.536 8.85078 14.6198 9.02798 14.643L9.12866 14.6496H12.5855L12.6852 14.643C12.8708 14.6186 13.0399 14.528 13.1583 14.3893C13.2766 14.2506 13.3355 14.0742 13.3229 13.8957C13.3104 13.7172 13.2275 13.5499 13.0908 13.4275C12.9541 13.3052 12.7739 13.2368 12.5865 13.2363M15.7935 11.3518C15.5317 11.3518 15.2807 11.4511 15.0956 11.6278C14.9104 11.8045 14.8064 12.0442 14.8064 12.294C14.8064 12.5439 14.9104 12.7836 15.0956 12.9603C15.2807 13.137 15.5317 13.2363 15.7935 13.2363C16.0553 13.2363 16.3064 13.137 16.4915 12.9603C16.6766 12.7836 16.7806 12.5439 16.7806 12.294C16.7806 12.0442 16.6766 11.8045 16.4915 11.6278C16.3064 11.4511 16.0553 11.3518 15.7935 11.3518ZM5.92257 11.3518C5.66077 11.3518 5.4097 11.4511 5.22459 11.6278C5.03947 11.8045 4.93547 12.0442 4.93547 12.294C4.93547 12.5439 5.03947 12.7836 5.22459 12.9603C5.4097 13.137 5.66077 13.2363 5.92257 13.2363C6.18436 13.2363 6.43544 13.137 6.62055 12.9603C6.80567 12.7836 6.90967 12.5439 6.90967 12.294C6.90967 12.0442 6.80567 11.8045 6.62055 11.6278C6.43544 11.4511 6.18436 11.3518 5.92257 11.3518Z" fill="currentColor"/>
+                </svg>
+              </button>
+
+              <!-- 7. Team -->
+              <button type="button" class="menu-item" aria-label="Team" data-panel-target="team">
+                <svg width="23" height="23" viewBox="0 0 23 23" fill="none" xmlns="[w3.org](http://www.w3.org/2000/svg)" aria-hidden="true">
+                  <path d="M11.0666 9.40848C12.7695 9.40848 14.15 8.04538 14.15 6.36391C14.15 4.68244 12.7695 3.31934 11.0666 3.31934C9.36366 3.31934 7.98315 4.68244 7.98315 6.36391C7.98315 8.04538 9.36366 9.40848 11.0666 9.40848Z" fill="currentColor"/>
+                  <path d="M20.6636 12.9703H16.2134V12.3225C16.2134 12.1507 16.1451 11.9859 16.0236 11.8644C15.9022 11.7429 15.7374 11.6747 15.5656 11.6747C15.3938 11.6747 15.229 11.7429 15.1075 11.8644C14.9861 11.9859 14.9178 12.1507 14.9178 12.3225V12.9703H13.6611V11.137C12.809 10.9573 11.9409 10.864 11.07 10.8585C9.02553 10.8508 7.01038 11.3445 5.20109 12.2966C5.12051 12.3384 5.05306 12.4016 5.00619 12.4794C4.95932 12.5571 4.93486 12.6463 4.9355 12.7371V16.3711H9.54122V20.3161C9.54122 20.4879 9.60947 20.6527 9.73096 20.7741C9.85244 20.8956 10.0172 20.9639 10.189 20.9639H20.6636C20.8354 20.9639 21.0002 20.8956 21.1217 20.7741C21.2432 20.6527 21.3114 20.4879 21.3114 20.3161V13.618C21.3114 13.4462 21.2432 13.2815 21.1217 13.16C21.0002 13.0385 20.8354 12.9703 20.6636 12.9703ZM20.0159 19.6813H10.8368V14.2658H14.9178V14.8553C14.9178 15.0271 14.9861 15.1919 15.1075 15.3134C15.229 15.4348 15.3938 15.5031 15.5656 15.5031C15.7374 15.5031 15.9022 15.4348 16.0236 15.3134C16.1451 15.1919 16.2134 15.0271 16.2134 14.8553V14.2658H20.0159V19.6813Z" fill="currentColor"/>
+                </svg>
+              </button>
+
+              <!-- 8. Card Refresh -->
+              <button type="button" class="menu-item" aria-label="Card refresh" data-panel-target="card">
+                <svg width="23" height="23" viewBox="0 0 23 23" fill="none" xmlns="[w3.org](http://www.w3.org/2000/svg)" aria-hidden="true">
+                  <path d="M4.44181 2.51762C3.89207 2.51762 3.36484 2.736 2.97611 3.12473C2.58738 3.51346 2.369 4.04069 2.369 4.59044V17.0273C2.369 17.5771 2.58738 18.1043 2.97611 18.493C3.36484 18.8818 3.89207 19.1001 4.44181 19.1001H10.7777C10.6197 19.5472 10.6197 20.035 10.7777 20.482H4.44181C3.52557 20.482 2.64686 20.118 1.99898 19.4702C1.3511 18.8223 0.987122 17.9436 0.987122 17.0273V4.59044C0.987122 3.67419 1.3511 2.79548 1.99898 2.1476C2.64686 1.49972 3.52557 1.13574 4.44181 1.13574H16.8787C17.795 1.13574 18.6737 1.49972 19.3215 2.1476C19.9694 2.79548 20.3334 3.67419 20.3334 4.59044V10.9263C19.8863 10.7683 19.3986 10.7683 18.9515 10.9263V4.59044C18.9515 4.04069 18.7331 3.51346 18.3444 3.12473C17.9557 2.736 17.4285 2.51762 16.8787 2.51762H4.44181ZM5.13275 3.8995C4.76626 3.8995 4.41477 4.04509 4.15562 4.30424C3.89647 4.56339 3.75088 4.91488 3.75088 5.28137V6.66325C3.75088 7.02975 3.89647 7.38123 4.15562 7.64039C4.41477 7.89954 4.76626 8.04513 5.13275 8.04513H6.51463C6.88113 8.04513 7.23261 7.89954 7.49177 7.64039C7.75092 7.38123 7.89651 7.02975 7.89651 6.66325V5.28137C7.89651 4.91488 7.75092 4.56339 7.49177 4.30424C7.23261 4.04509 6.88113 3.8995 6.51463 3.8995H5.13275ZM10.6603 3.8995C10.2938 3.8995 9.94228 4.04509 9.68313 4.30424C9.42398 4.56339 9.27839 4.91488 9.27839 5.28137V6.66325C9.27839 7.02975 9.42398 7.38123 9.68313 7.64039C9.94228 7.89954 10.2938 8.04513 10.6603 8.04513H16.1878C16.5543 8.04513 16.9058 7.89954 17.1649 7.64039C17.4241 7.38123 17.5696 7.02975 17.5696 6.66325V5.28137C17.5696 4.91488 17.4241 4.56339 17.1649 4.30424C16.9058 4.04509 16.5543 3.8995 16.1878 3.8995H10.6603ZM5.13275 9.42701C4.76626 9.42701 4.41477 9.5726 4.15562 9.83175C3.89647 10.0909 3.75088 10.4424 3.75088 10.8089V16.3364C3.75088 16.7029 3.89647 17.0544 4.15562 17.3135C4.41477 17.5727 4.76626 17.7183 5.13275 17.7183H6.51463C6.88113 17.7183 7.23261 17.5727 7.49177 17.3135C7.75092 17.0544 7.89651 16.7029 7.89651 16.3364V10.8089C7.89651 10.4424 7.75092 10.0909 7.49177 9.83175C7.23261 9.5726 6.88113 9.42701 6.51463 9.42701H5.13275ZM20.1316 12.3925C20.0675 12.3282 19.9912 12.2771 19.9073 12.2423C19.8233 12.2075 19.7333 12.1895 19.6425 12.1895C19.5516 12.1895 19.4616 12.2075 19.3777 12.2423C19.2937 12.2771 19.2175 12.3282 19.1533 12.3925L17.7714 13.7744C17.6417 13.9041 17.5688 14.0801 17.5688 14.2636C17.5688 14.4471 17.6417 14.623 17.7714 14.7528C17.9011 14.8825 18.0771 14.9554 18.2606 14.9554C18.4441 14.9554 18.62 14.8825 18.7498 14.7528L18.9515 14.5496V17.0273C18.9515 17.5771 18.7331 18.1043 18.3444 18.493C17.9557 18.8818 17.4285 19.1001 16.8787 19.1001H14.401L14.6041 18.8984C14.7339 18.7687 14.8068 18.5927 14.8068 18.4092C14.8068 18.2257 14.7339 18.0498 14.6041 17.92C14.4744 17.7903 14.2984 17.7174 14.115 17.7174C13.9315 17.7174 13.7555 17.7903 13.6258 17.92L12.2439 19.3019C12.1795 19.3661 12.1285 19.4423 12.0937 19.5263C12.0588 19.6102 12.0409 19.7002 12.0409 19.7911C12.0409 19.882 12.0588 19.972 12.0937 20.0559C12.1285 20.1398 12.1795 20.2161 12.2439 20.2803L13.6258 21.6621C13.7555 21.7919 13.9315 21.8648 14.115 21.8648C14.2984 21.8648 14.4744 21.7919 14.6041 21.6621C14.7339 21.5324 14.8068 21.3564 14.8068 21.173C14.8068 20.9895 14.7339 20.8135 14.6041 20.6838L14.401 20.482H16.8787C17.795 20.482 18.6737 20.118 19.3215 19.4702C19.9694 18.8223 20.3334 17.9436 20.3334 17.0273V14.5496L20.5352 14.7528C20.6649 14.8825 20.8409 14.9554 21.0243 14.9554C21.2078 14.9554 21.3838 14.8825 21.5135 14.7528C21.6433 14.623 21.7162 14.4471 21.7162 14.2636C21.7162 14.0801 21.6433 13.9041 21.5135 13.7744L20.1316 12.3925Z" fill="currentColor"/>
+                </svg>
+              </button>
+
+              <!-- 9. Megaphone -->
+              <button type="button" class="menu-item" aria-label="Megaphone" data-panel-target="megaphone">
+                <svg width="23" height="23" viewBox="0 0 23 23" fill="none" xmlns="[w3.org](http://www.w3.org/2000/svg)" aria-hidden="true">
+                  <path d="M19.3571 3.38149C19.1354 3.23812 18.882 3.15138 18.619 3.1289C18.356 3.10642 18.0915 3.14889 17.8488 3.25258L9.89493 6.38514C9.70682 6.46241 9.50531 6.50184 9.30194 6.50116H4.20992C3.78255 6.50116 3.37268 6.67093 3.07049 6.97313C2.76829 7.27532 2.59852 7.68519 2.59852 8.11256V8.24147H0.987122V12.1088H2.59852V12.2764C2.60862 12.697 2.78284 13.097 3.08395 13.3909C3.38505 13.6848 3.78917 13.8493 4.20992 13.8491L6.1436 17.9485C6.27453 18.2246 6.48067 18.4581 6.73835 18.6223C6.99602 18.7865 7.29478 18.8747 7.6003 18.8767H8.41245C8.83758 18.8733 9.24414 18.702 9.54355 18.4002C9.84297 18.0984 10.011 17.6904 10.011 17.2653V14.0038L17.8488 17.1364C18.0418 17.2122 18.2473 17.2516 18.4547 17.2524C18.7765 17.2465 19.0897 17.148 19.3571 16.9688C19.5691 16.8256 19.744 16.6341 19.8673 16.4099C19.9906 16.1857 20.0587 15.9354 20.0661 15.6797V4.70928C20.0649 4.44697 19.9997 4.18891 19.8761 3.95751C19.7526 3.72612 19.5744 3.52839 19.3571 3.38149ZM8.39956 8.11256V12.2764H4.20992V8.11256H8.39956ZM8.39956 17.2653H7.58741L6.00179 13.8491H8.39956V17.2653ZM10.4879 12.4698C10.3348 12.3916 10.1752 12.3269 10.011 12.2764V8.02232C10.1736 7.9885 10.3332 7.94107 10.4879 7.88052L18.4547 4.70928V15.641L10.4879 12.4698ZM20.1048 8.56375V11.7865C20.5321 11.7865 20.942 11.6168 21.2442 11.3146C21.5464 11.0124 21.7162 10.6025 21.7162 10.1751C21.7162 9.74778 21.5464 9.33791 21.2442 9.03572C20.942 8.73352 20.5321 8.56375 20.1048 8.56375Z" fill="currentColor"/>
+                </svg>
+              </button>
+            </div>
+          </nav>
+
+          <div class="sb-primary-spacer" aria-hidden="true"></div>
+
+          <button type="button" class="avatar-btn" title="Account" aria-label="User profile">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <defs>
+                <clipPath id="clipAvatar">
+                  <circle cx="12" cy="12" r="10"/>
+                </clipPath>
+              </defs>
+              <g clip-path="url(#clipAvatar)">
+                <rect width="24" height="24" fill="white"/>
+                <circle cx="12" cy="9" r="3" fill="#777"/>
+                <path d="M2 22c3-5 6-7 10-7s7 2 10 7H2z" fill="#777"/>
+              </g>
+              <circle cx="12" cy="12" r="10" stroke="#777" stroke-width="2" fill="none"/>
+            </svg>
+          </button>
+        </div>
+
+        <!-- Cột 2: Secondary — menu chữ -->
+        <nav class="sidebar-secondary" id="sidebarSecondary" aria-label="Section navigation">
+          <div class="sb-secondary-panel is-active" data-panel="station">
+            <div class="sb-sec-group">
+              <h3 class="sb-sec-title">General</h3>
+              <a href="#" class="sb-sec-link is-active" id="stationNavLink" aria-current="page">Station</a>
+              <a href="poles.html" class="sb-sec-link">Pole</a>
+            </div>
+            <div class="sb-sec-group">
+              <h3 class="sb-sec-title">Manage</h3>
+              <a href="monitor.html" class="sb-sec-link">Monitor</a>
+              <a href="history.html" class="sb-sec-link">History</a>
+            </div>
+          </div>
+          <div class="sb-secondary-panel" data-panel="search">
+            <div class="sb-sec-group">
+              <h3 class="sb-sec-title">Search</h3>
+              <a href="#" class="sb-sec-link is-active">Global Search</a>
+              <a href="#" class="sb-sec-link">Recent Search</a>
+              <a href="#" class="sb-sec-link">Saved Search</a>
+            </div>
+          </div>
+          <div class="sb-secondary-panel" data-panel="printer">
+            <div class="sb-sec-group">
+              <h3 class="sb-sec-title">Print</h3>
+              <a href="#" class="sb-sec-link is-active">Print Queue</a>
+              <a href="#" class="sb-sec-link">Print Template</a>
+            </div>
+          </div>
+          <div class="sb-secondary-panel" data-panel="users">
+            <div class="sb-sec-group">
+              <h3 class="sb-sec-title">Users</h3>
+              <a href="#" class="sb-sec-link is-active">User List</a>
+              <a href="#" class="sb-sec-link">Roles</a>
+            </div>
+          </div>
+          <div class="sb-secondary-panel" data-panel="briefcase">
+            <div class="sb-sec-group">
+              <h3 class="sb-sec-title">Business</h3>
+              <a href="#" class="sb-sec-link is-active">Overview</a>
+              <a href="#" class="sb-sec-link">Reports</a>
+            </div>
+          </div>
+          <div class="sb-secondary-panel" data-panel="bus">
+            <div class="sb-sec-group">
+              <h3 class="sb-sec-title">Transport</h3>
+              <a href="#" class="sb-sec-link is-active">Bus Charger</a>
+              <a href="#" class="sb-sec-link">Fleet</a>
+            </div>
+          </div>
+          <div class="sb-secondary-panel" data-panel="team">
+            <div class="sb-sec-group">
+              <h3 class="sb-sec-title">Team</h3>
+              <a href="#" class="sb-sec-link is-active">Members</a>
+              <a href="#" class="sb-sec-link">Permissions</a>
+            </div>
+          </div>
+          <div class="sb-secondary-panel" data-panel="card">
+            <div class="sb-sec-group">
+              <h3 class="sb-sec-title">Cards</h3>
+              <a href="#" class="sb-sec-link is-active">Refresh Cards</a>
+              <a href="#" class="sb-sec-link">Card Settings</a>
+            </div>
+          </div>
+          <div class="sb-secondary-panel" data-panel="megaphone">
+            <div class="sb-sec-group">
+              <h3 class="sb-sec-title">Announcements</h3>
+              <a href="#" class="sb-sec-link is-active">Broadcast</a>
+              <a href="#" class="sb-sec-link">Templates</a>
+            </div>
+          </div>
+        </nav>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <header class="topbar">
+        <div class="topbar__left">
+          <h1 class="page-title" id="pageTitle">
+            <span class="page-title__base">EVC Management</span>
+            <span class="page-title__sep" aria-hidden="true"> &gt; </span>
+            <span id="pageTitleCurrent" class="page-title__current">Station</span>
+            <span id="pageTitleSuffix" class="page-title__suffix is-hidden"></span>
+          </h1>
+        </div>
+        <div class="topbar__actions">
+          <button type="button" id="notifToggle" class="bell-toggle" aria-label="Notifications" aria-pressed="false" title="Toggle notifications">
+            <span class="bell-toggle__icon" aria-hidden="true">
+              <svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="1" y="1" width="62" height="62" rx="16" fill="#D8F2DF"/>
+                <path d="M32 20C28.134 20 25 23.134 25 27V29.712C25 30.534 24.734 31.334 24.242 31.994L22.803 33.921C21.694 35.406 22.754 37.5 24.607 37.5H39.393C41.246 37.5 42.306 35.406 41.197 33.921L39.758 31.994C39.266 31.334 39 30.534 39 29.712V27C39 23.134 35.866 20 32 20Z" fill="currentColor"/>
+                <path d="M28.5 39.25C29.123 41.109 30.268 42 32 42C33.732 42 34.877 41.109 35.5 39.25H28.5Z" fill="currentColor"/>
+              </svg>
+            </span>
+            <span class="bell-badge is-hidden" aria-live="polite">0</span>
+          </button>
+        </div>
+      </header>
+
+      <input type="hidden" id="createCalendarSelectedDates" name="calendarSelectedDates" value="">
+
+      <section id="listView" class="card">
+        <div class="card-header card-header--list">
+          <div class="header-actions">
+            <button id="createBtn" type="button" class="primary-btn">Create new</button>
+          </div>
+          <div class="list-header-bar">
+            <h2>Stations List</h2>
+            <div class="search-box">
+              <div class="search-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" xmlns="[w3.org](http://www.w3.org/2000/svg)">
+                  <circle cx="10.5" cy="10.5" r="6.5" stroke="#9E9E9E" stroke-width="2"/>
+                  <line x1="15.5" y1="15.5" x2="21" y2="21" stroke="#9E9E9E" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+              </div>
+              <input id="searchInput" class="search-input" type="text" placeholder="Search ..." autocomplete="off">
+              <button type="button" id="searchClearBtn" class="clear-btn is-hidden" aria-label="Clear search">
+                <svg viewBox="0 0 20 20" fill="none" xmlns="[w3.org](http://www.w3.org/2000/svg)" aria-hidden="true">
+                  <path d="M6.5 6.5L13.5 13.5" stroke="white" stroke-width="2" stroke-linecap="round"/>
+                  <path d="M13.5 6.5L6.5 13.5" stroke="white" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>StationID</th>
+                <th>StationName</th>
+                <th>
+                  <span class="th-with-filter">
+                    <span class="th-with-filter__label">Address</span>
+                    <button type="button" class="th-filter-btn" aria-label="Filter or sort Address">
+                      <svg class="th-filter-icon" viewBox="0 0 14 14" width="14" height="14" aria-hidden="true" xmlns="[w3.org](http://www.w3.org/2000/svg)">
+                        <rect x="1" y="2" width="12" height="2" rx="0.5" fill="currentColor"/>
+                        <rect x="3" y="6" width="8" height="2" rx="0.5" fill="currentColor"/>
+                        <rect x="5" y="10" width="4" height="2" rx="0.5" fill="currentColor"/>
+                      </svg>
+                    </button>
+                  </span>
+                </th>
+                <th>
+                  <span class="th-with-filter">
+                    <span class="th-with-filter__label">Latitude</span>
+                    <button type="button" class="th-filter-btn" id="latCalendarBtn" aria-label="Open date picker" aria-haspopup="dialog" aria-expanded="false" aria-controls="coordCalendarPopover">
+                      <svg class="th-filter-icon" viewBox="0 0 14 14" width="14" height="14" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="1" y="2" width="12" height="2" rx="0.5" fill="currentColor"/>
+                        <rect x="3" y="6" width="8" height="2" rx="0.5" fill="currentColor"/>
+                        <rect x="5" y="10" width="4" height="2" rx="0.5" fill="currentColor"/>
+                      </svg>
+                    </button>
+                  </span>
+                </th>
+                <th>
+                  <span class="th-with-filter">
+                    <span class="th-with-filter__label">Longitude</span>
+                    <button type="button" class="th-filter-btn" id="lonCalendarBtn" aria-label="Open date picker" aria-haspopup="dialog" aria-expanded="false" aria-controls="coordCalendarPopover">
+                      <svg class="th-filter-icon" viewBox="0 0 14 14" width="14" height="14" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="1" y="2" width="12" height="2" rx="0.5" fill="currentColor"/>
+                        <rect x="3" y="6" width="8" height="2" rx="0.5" fill="currentColor"/>
+                        <rect x="5" y="10" width="4" height="2" rx="0.5" fill="currentColor"/>
+                      </svg>
+                    </button>
+                  </span>
+                </th>
+                <th>
+                  <span class="th-with-filter">
+                    <span class="th-with-filter__label">CreateAt</span>
+                    <button type="button" class="th-filter-btn" aria-label="Filter or sort CreateAt">
+                      <svg class="th-filter-icon" viewBox="0 0 14 14" width="14" height="14" aria-hidden="true" xmlns="[w3.org](http://www.w3.org/2000/svg)">
+                        <rect x="1" y="2" width="12" height="2" rx="0.5" fill="currentColor"/>
+                        <rect x="3" y="6" width="8" height="2" rx="0.5" fill="currentColor"/>
+                        <rect x="5" y="10" width="4" height="2" rx="0.5" fill="currentColor"/>
+                      </svg>
+                    </button>
+                  </span>
+                </th>
+                <!-- Cột Status - giống style Longitude -->
+                <th>
+                  <span class="th-with-filter">
+                    <span class="th-with-filter__label">Status</span>
+                    <button type="button" class="th-filter-btn th-filter-btn--calendar" 
+                            id="statusFilterBtn"
+                            aria-label="Filter by Status"
+                            aria-haspopup="dialog" 
+                            aria-expanded="false"
+                            aria-controls="statusPopover">
+                      <svg class="th-filter-icon" viewBox="0 0 14 14" width="14" height="14" aria-hidden="true" xmlns="[w3.org](http://www.w3.org/2000/svg)">
+                        <rect x="1" y="2" width="12" height="2" rx="0.5" fill="currentColor"/>
+                        <rect x="3" y="6" width="8" height="2" rx="0.5" fill="currentColor"/>
+                        <rect x="5" y="10" width="4" height="2" rx="0.5" fill="currentColor"/>
+                      </svg>
+                    </button>
+                  </span>
+                </th>
+                <th aria-label="Deactivate action"></th>
+                <th aria-label="Edit action"></th>
+              </tr>
+            </thead>
+            <tbody id="stationTableBody"></tbody>
+          </table>
+        </div>
+        <div id="stationPagination" class="table-pagination"></div>
+      </section>
+
+      <section id="detailView" class="card is-hidden">
+        <div class="detail-header">
+          <h2>Station Details</h2>
+          <button id="backIconBtn" class="icon-btn detail-close-btn" aria-label="Close details">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <path d="M6 6L18 18" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>
+              <path d="M18 6L6 18" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>
+            </svg>
+          </button>
+        </div>
+
+        <div class="detail-grid">
+          <div class="detail-item">
+            <span class="label">Station Name</span>
+            <strong id="d-name"></strong>
+          </div>
+          <div class="detail-item">
+            <span class="label">Station ID</span>
+            <strong id="d-id"></strong>
+          </div>
+          <div class="detail-item full">
+            <span class="label">Address</span>
+            <strong id="d-address"></strong>
+          </div>
+          <div class="detail-item">
+            <span class="label">Coordinates</span>
+            <strong id="d-location"></strong>
+          </div>
+          <div class="detail-item">
+            <span class="label">Status</span>
+            <strong id="d-status"></strong>
+          </div>
+          <div class="detail-item full">
+            <span class="label">Operating Hours</span>
+            <strong id="d-operation-time"></strong>
+          </div>
+        </div>
+
+        <div class="connector-box">
+          <h3>Charging Connectors &amp; Connector Status</h3>
+          <ul id="d-connectors"></ul>
+        </div>
+
+        <div class="actions">
+          <button id="detailDeleteBtn" class="danger-btn" type="button">Delete</button>
+        </div>
+      </section>
+
+      <section id="stationActionView" class="card is-hidden">
+        <div class="detail-header">
+          <h2 id="actionViewTitle">Station Action</h2>
+          <button id="backToDetailBtn" class="icon-btn" aria-label="Back to station details">←</button>
+        </div>
+        <div class="detail-item full">
+          <span class="label">Selected Station</span>
+          <strong id="actionStationMeta"></strong>
+        </div>
+        <div class="detail-item full">
+          <span class="label">Action Description</span>
+          <strong id="actionViewDescription"></strong>
+        </div>
+      </section>
+      <section id="historyView" class="card history-view is-hidden">
+        <div class="history-hero">
+          <div>
+            <h2 class="history-hero__title">Station Usage History</h2>
+            <p class="history-hero__desc">Review charging session history by station, connector, and session status to analyze usage trends and support issue diagnosis.</p>
+          </div>
+          <div class="history-export" id="historyExportMenu">
+            <button type="button" class="history-export__trigger" id="historyExportTrigger" aria-haspopup="menu" aria-expanded="false">
+              <span class="history-export__icon" aria-hidden="true">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M12 3V14" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M7.5 10.5L12 15L16.5 10.5" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M3 18.2C3 17.0954 3.89543 16.2 5 16.2H7.3C7.8198 16.2 8.30877 16.4545 8.61 16.8825L9.15 17.6494C9.45042 18.0762 9.93854 18.33 10.4575 18.33H13.5425C14.0615 18.33 14.5496 18.0762 14.85 17.6494L15.39 16.8825C15.6912 16.4545 16.1802 16.2 16.7 16.2H19C20.1046 16.2 21 17.0954 21 18.2V18.9C21 20.0598 20.0598 21 18.9 21H5.1C3.9402 21 3 20.0598 3 18.9V18.2Z" fill="currentColor"/>
+                  <circle cx="18" cy="18.7" r="1.1" fill="#17863A"/>
+                </svg>
+              </span>
+              <span>Export File</span>
+            </button>
+            <div class="history-export__menu" id="historyExportOptions" role="menu" aria-label="Export file type">
+              <button type="button" class="history-export__option" data-export-type="csv" role="menuitem">CSV</button>
+              <button type="button" class="history-export__option" data-export-type="xlsx" role="menuitem">XLSX</button>
+              <button type="button" class="history-export__option" data-export-type="pdf" role="menuitem">PDF</button>
+            </div>
+          </div>
+        </div>
+
+        <div id="historyExportFeedback" class="history-export__feedback" aria-live="polite"></div>
+
+        <div class="history-filters">
+          <h3 class="history-filters__title">Filter Sessions</h3>
+          <div class="history-filters__grid">
+            <div class="history-field">
+              <label for="historyDateFrom">From Date</label>
+              <input id="historyDateFrom" type="hidden" value="2026-03-01">
+              <button type="button" id="historyDateFromTrigger" class="history-date-trigger" aria-haspopup="dialog" aria-expanded="false">
+                <span id="historyDateFromText" class="history-date-trigger__text">Mar 01, 2026</span>
+                <span class="history-date-trigger__icon" aria-hidden="true">▾</span>
+              </button>
+            </div>
+            <div class="history-field">
+              <label for="historyDateTo">To Date</label>
+              <input id="historyDateTo" type="hidden" value="2026-04-01">
+              <button type="button" id="historyDateToTrigger" class="history-date-trigger" aria-haspopup="dialog" aria-expanded="false">
+                <span id="historyDateToText" class="history-date-trigger__text">Apr 01, 2026</span>
+                <span class="history-date-trigger__icon" aria-hidden="true">▾</span>
+              </button>
+            </div>
+            <div class="history-field">
+              <label for="historyStationFilter">Station</label>
+              <select id="historyStationFilter"></select>
+            </div>
+            <div class="history-field">
+              <label for="historyConnectorFilter">Connector</label>
+              <select id="historyConnectorFilter"></select>
+            </div>
+            <div class="history-field">
+              <label for="historyStatusFilter">Session Status</label>
+              <select id="historyStatusFilter">
+                <option value="all">All Status</option>
+                <option value="completed">Completed</option>
+                <option value="cancelled">Cancelled</option>
+                <option value="failed">Failed</option>
+                <option value="ongoing">Ongoing</option>
+              </select>
+            </div>
+            <div class="history-field">
+              <label for="historyChartMode">Chart View</label>
+              <select id="historyChartMode">
+                <option value="day">By Day</option>
+                <option value="week">By Week</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="history-grid">
+          <div class="history-panel">
+            <h3 class="history-panel__title">Usage Trend</h3>
+            <p class="history-panel__desc">Session volume by day or week based on the current filters.</p>
+            <div id="historyChart" class="history-chart"></div>
+          </div>
+          <div class="history-panel">
+            <h3 class="history-panel__title">Summary</h3>
+            <p class="history-panel__desc">Quick metrics to evaluate charging station usage.</p>
+            <div class="history-summary">
+              <div class="history-metric">
+                <span class="history-metric__label">Total Sessions</span>
+                <strong id="historyMetricSessions" class="history-metric__value">0</strong>
+              </div>
+              <div class="history-metric">
+                <span class="history-metric__label">Energy Delivered</span>
+                <strong id="historyMetricEnergy" class="history-metric__value">0 kWh</strong>
+              </div>
+              <div class="history-metric">
+                <span class="history-metric__label">Average Duration</span>
+                <strong id="historyMetricDuration" class="history-metric__value">0 min</strong>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="history-table-card">
+          <div class="history-table-card__head">
+            <h3 class="history-table-card__title">Charging Sessions</h3>
+            <span id="historyResultCount" class="label">0 results</span>
+          </div>
+          <div class="history-table-wrap">
+            <table class="history-table">
+              <thead>
+                <tr>
+                  <th>Session ID</th>
+                  <th>Station</th>
+                  <th>Connector</th>
+                  <th>Start</th>
+                  <th>End</th>
+                  <th>kWh</th>
+                  <th>Duration</th>
+                  <th>Status</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="historyTableBody"></tbody>
+            </table>
+          </div>
+          <div id="historyEmptyState" class="history-empty">No results found</div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Panel Tạo trạm sạc (drawer phải) -->
+  <div id="createStationBackdrop" class="create-drawer-backdrop" aria-hidden="true"></div>
+  <div id="createStationPanel" class="create-drawer legacy-create-mode" role="dialog" aria-modal="true" aria-labelledby="createStationTitle" aria-hidden="true">
+    <div class="create-drawer__inner">
+      <header class="create-drawer__header">
+        <div class="create-drawer__head-text">
+          <h2 id="createStationTitle" class="create-drawer__title">Create new</h2>
+          <div class="create-drawer__meta">
+            <span id="createStationDraftId" class="create-drawer__meta-item"></span>
+            <span id="createStationDraftDate" class="create-drawer__meta-item"></span>
+          </div>
+        </div>
+        <button type="button" class="create-drawer__close" id="createStationCloseBtn" aria-label="Close">
+          <svg width="18" height="18" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="M1 1L13 13M13 1L1 13" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </button>
+      </header>
+      <div class="create-drawer__rule" role="presentation"></div>
+
+      <form id="createStationForm" class="create-drawer__form" novalidate>
+        <input id="createOperationTime" name="operationTime" type="hidden" value="24/7">
+        <input id="createStatus" name="status" type="hidden" value="Active">
+
+        <div class="create-field">
+          <label class="create-field__label" for="createStationName">Station Name</label>
+          <input id="createStationName" name="stationName" type="text" class="create-field__input" placeholder="Input Name" autocomplete="off" required>
+        </div>
+
+        <div class="create-field-row">
+          <div class="create-field">
+            <label class="create-field__label" for="createLatitude">Latitude</label>
+            <input id="createLatitude" name="latitude" type="text" class="create-field__input" placeholder="Input Name" inputmode="decimal" autocomplete="off" required>
+          </div>
+          <div class="create-field">
+            <label class="create-field__label" for="createLongitude">Longitude</label>
+            <input id="createLongitude" name="longitude" type="text" class="create-field__input" placeholder="Input Name" inputmode="decimal" autocomplete="off" required>
+          </div>
+        </div>
+
+        <div class="create-field">
+          <label class="create-field__label" for="createAddress">Address</label>
+          <div class="create-field__input-wrap create-field__input-wrap--search">
+            <span class="create-field__search-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" width="20" height="20" xmlns="[w3.org](http://www.w3.org/2000/svg)">
+                <circle cx="10.5" cy="10.5" r="6.5" stroke="currentColor" stroke-width="2"/>
+                <line x1="15.5" y1="15.5" x2="21" y2="21" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+            </span>
+            <input id="createAddress" name="address" type="text" class="create-field__input create-field__input--with-icon" placeholder="Find address" autocomplete="off" required>
+          </div>
+        </div>
+
+        <div class="create-field">
+          <label class="create-field__label" for="createPoleList">Pole list</label>
+          <div class="create-select-wrap">
+            <select id="createPoleList" name="poleList" class="create-field__select" required>
+              <option value="">Select Pole</option>
+              <option value="pole-1">Pole 1 — 1 connector</option>
+              <option value="pole-2">Pole 2 — 2 connectors</option>
+              <option value="pole-3">Pole 3 — 3 connectors</option>
+            </select>
+          </div>
+          <div id="createPoleChips" class="create-pole-chips is-hidden" aria-live="polite"></div>
+        </div>
+
+        <p id="createStationFormError" class="create-drawer__error is-hidden" role="alert"></p>
+      </form>
+
+      <footer class="create-drawer__footer">
+        <div class="create-drawer__footer-actions">
+          <button type="button" class="create-drawer__btn create-drawer__btn--secondary" id="createStationCancelBtn">Cancel</button>
+          <button type="submit" form="createStationForm" class="create-drawer__btn create-drawer__btn--primary" id="createStationSaveBtn">Save</button>
+        </div>
+      </footer>
+    </div>
+  </div>
+
+  <!-- Lịch chọn nhiều ngày (Latitude / Longitude) -->
+  <div id="coordCalendarPopover" class="coord-calendar-popover" role="dialog" aria-modal="true" aria-labelledby="coordCalendarTitle" aria-hidden="true">
+    <div class="coord-calendar">
+      <header class="coord-calendar__header">
+        <button type="button" class="coord-calendar__nav" id="coordCalPrevMonth" aria-label="Previous month">
+          <svg width="10" height="16" viewBox="0 0 10 16" fill="none" xmlns="[w3.org](http://www.w3.org/2000/svg)" aria-hidden="true"><path d="M8 1L2 8l6 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <h3 id="coordCalendarTitle" class="coord-calendar__title">February, 2025</h3>
+        <button type="button" class="coord-calendar__nav" id="coordCalNextMonth" aria-label="Next month">
+          <svg width="10" height="16" viewBox="0 0 10 16" fill="none" xmlns="[w3.org](http://www.w3.org/2000/svg)" aria-hidden="true"><path d="M2 1l6 7-6 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+      </header>
+      <div class="coord-calendar__weekdays" aria-hidden="true">
+        <span>S</span><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span>
+      </div>
+      <div id="coordCalendarGrid" class="coord-calendar__grid"></div>
+      <footer class="coord-calendar__footer">
+        <button type="button" class="coord-calendar__btn-text" id="coordCalCancel">Cancel</button>
+        <button type="button" class="coord-calendar__btn-done" id="coordCalDone">Done</button>
+      </footer>
+    </div>
+  </div>
+
+  <!-- Status Popover - giống style coord-calendar-popover -->
+  <div id="statusPopover" class="status-popover" role="dialog" aria-modal="true" aria-label="Filter by status" aria-hidden="true">
+    <ul class="status-popover__list">
+      <li class="status-popover__item active" data-status="all">All Status</li>
+      <li class="status-popover__item" data-status="active">Active</li>
+      <li class="status-popover__item" data-status="inactive">Inactive</li>
+    </ul>
+  </div>
+
+  <div id="deleteConfirmBackdrop" class="confirm-backdrop" aria-hidden="true"></div>
+  <div id="deleteConfirmModal" class="confirm-modal" role="dialog" aria-modal="true" aria-labelledby="deleteConfirmTitle" aria-hidden="true">
+    <div class="confirm-modal__header">
+      <h2 id="deleteConfirmTitle" class="confirm-modal__title">Confirm?</h2>
+      <button type="button" class="confirm-modal__close" id="deleteConfirmCloseBtn" aria-label="Close confirmation">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path d="M5 5L19 19" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>
+          <path d="M19 5L5 19" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>
+        </svg>
+      </button>
+    </div>
+    <div class="confirm-modal__body">
+      <p class="confirm-modal__note">
+        <span class="confirm-modal__note-label">Note:</span>
+        <span class="confirm-modal__note-danger">This action cannot be undone.</span>
+      </p>
+      <p class="confirm-modal__message">Are you sure you want to delete this?</p>
+    </div>
+    <div class="confirm-modal__actions">
+      <button type="button" class="confirm-modal__btn confirm-modal__btn--secondary" id="deleteConfirmNoBtn">No</button>
+      <button type="button" class="confirm-modal__btn confirm-modal__btn--danger" id="deleteConfirmYesBtn">Yes</button>
+    </div>
+  </div>
+
+  <div id="deactivateStationOverlay" class="pole-confirm-overlay" aria-hidden="true">
+    <div class="pole-confirm-modal pole-confirm-modal--deactivate" role="dialog" aria-modal="true" aria-labelledby="deactivateStationTitle">
+      <div class="pole-confirm-modal__icon">!</div>
+      <h2 id="deactivateStationTitle" class="pole-confirm-modal__title">Deactivate Charging Station?</h2>
+      <p id="deactivateStationMessage" class="pole-confirm-modal__message pole-confirm-modal__message--center">
+        Are you sure you want to deactivate this charging station?
+      </p>
+      <div class="pole-confirm-modal__actions">
+        <button type="button" class="pole-confirm-modal__btn pole-confirm-modal__btn--secondary" id="deactivateStationCancelBtn">Cancel</button>
+        <button type="button" class="pole-confirm-modal__btn pole-confirm-modal__btn--danger" id="deactivateStationConfirmBtn">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="historyDetailOverlay" class="history-detail-overlay" aria-hidden="true">
+    <div class="history-detail-modal" role="dialog" aria-modal="true" aria-labelledby="historyDetailTitle">
+      <div class="history-detail-modal__header">
+        <h2 id="historyDetailTitle" class="history-detail-modal__title">Session Details</h2>
+        <button type="button" id="historyDetailCloseBtn" class="history-detail-modal__close" aria-label="Close history details">×</button>
+      </div>
+      <div class="history-detail-modal__grid">
+        <div class="history-detail-item">
+          <span class="history-detail-item__label">Session ID</span>
+          <strong id="historyDetailSessionId" class="history-detail-item__value"></strong>
+        </div>
+        <div class="history-detail-item">
+          <span class="history-detail-item__label">Station</span>
+          <strong id="historyDetailStation" class="history-detail-item__value"></strong>
+        </div>
+        <div class="history-detail-item">
+          <span class="history-detail-item__label">Connector</span>
+          <strong id="historyDetailConnector" class="history-detail-item__value"></strong>
+        </div>
+        <div class="history-detail-item">
+          <span class="history-detail-item__label">Status</span>
+          <strong id="historyDetailStatus" class="history-detail-item__value"></strong>
+        </div>
+        <div class="history-detail-item">
+          <span class="history-detail-item__label">Start Time</span>
+          <strong id="historyDetailStart" class="history-detail-item__value"></strong>
+        </div>
+        <div class="history-detail-item">
+          <span class="history-detail-item__label">End Time</span>
+          <strong id="historyDetailEnd" class="history-detail-item__value"></strong>
+        </div>
+        <div class="history-detail-item">
+          <span class="history-detail-item__label">Energy</span>
+          <strong id="historyDetailEnergy" class="history-detail-item__value"></strong>
+        </div>
+        <div class="history-detail-item">
+          <span class="history-detail-item__label">Duration</span>
+          <strong id="historyDetailDuration" class="history-detail-item__value"></strong>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="historyDatePopover" class="coord-calendar-popover" role="dialog" aria-modal="true" aria-labelledby="historyDateTitle" aria-hidden="true">
+    <div class="coord-calendar">
+      <header class="coord-calendar__header">
+        <button type="button" class="coord-calendar__nav" id="historyDatePrevMonth" aria-label="Previous month">
+          <svg width="10" height="16" viewBox="0 0 10 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M8 1L2 8l6 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <h3 id="historyDateTitle" class="coord-calendar__title">March 2026</h3>
+        <button type="button" class="coord-calendar__nav" id="historyDateNextMonth" aria-label="Next month">
+          <svg width="10" height="16" viewBox="0 0 10 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M2 1l6 7-6 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+      </header>
+      <div class="coord-calendar__weekdays" aria-hidden="true">
+        <span>S</span><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span>
+      </div>
+      <div id="historyDateGrid" class="coord-calendar__grid"></div>
+      <footer class="coord-calendar__footer">
+        <button type="button" class="coord-calendar__btn-text" id="historyDateCancel">Cancel</button>
+        <button type="button" class="coord-calendar__btn-done" id="historyDateDone">Done</button>
+      </footer>
+    </div>
+  </div>
+
+  <script src="./js/common.js"></script>
+  <script src="./js/evcs-config.js"></script>
+  <script src="./js/pages/alerts-store.js"></script>
+  <script src="./js/pages/station.js"></script>
+</body>
+</html>

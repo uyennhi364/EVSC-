@@ -1,0 +1,22 @@
+﻿@EVCS.Api_HostAddress = http://localhost:5198
+
+### Danh sách trạm sạc
+GET {{EVCS.Api_HostAddress}}/api/stations
+Accept: application/json
+
+### Tạo loại sạc
+POST {{EVCS.Api_HostAddress}}/api/charge-types
+Content-Type: application/json
+
+{
+  "code": "TY010",
+  "name": "CCS2",
+  "maxVoltage": 800,
+  "maxCurrent": 350,
+  "suitableCar": "Xe du lịch",
+  "status": "Available"
+}
+
+### Dashboard trạng thái trạm
+GET {{EVCS.Api_HostAddress}}/api/stations/dashboard
+Accept: application/json
