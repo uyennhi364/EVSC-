@@ -307,18 +307,19 @@ async function fetchHistorySessions() {
   }
 }
 
-function populateConnectorFilter(selectedStationId = "all") {
+function populateConnectorFilter(selectedStationId) {
   if (!els.historyConnectorFilter) return;
 
   let connectors;
-  if (selectedStationId === "all") {
-    connectors = [...new Set(allHistorySessions.map((item) => item.connector))].filter(Boolean);
+  if (!selectedStationId || selectedStationId === "all") {
+    connectors = [...new Set(allHistorySessions.map((s) => s.connector).filter(Boolean))];
   } else {
     connectors = [...new Set(
       allHistorySessions
-        .filter((item) => item.stationId === selectedStationId)
-        .map((item) => item.connector)
-    )].filter(Boolean);
+        .filter((s) => s.stationId === selectedStationId)
+        .map((s) => s.connector)
+        .filter(Boolean)
+    )];
   }
 
   if (connectors.length === 0) {
@@ -327,7 +328,7 @@ function populateConnectorFilter(selectedStationId = "all") {
   } else {
     els.historyConnectorFilter.disabled = false;
     els.historyConnectorFilter.innerHTML = ['<option value="all">All Connectors</option>']
-      .concat(connectors.map((connector) => `<option value="${connector}">${connector}</option>`))
+      .concat(connectors.map((c) => `<option value="${c}">${c}</option>`))
       .join("");
   }
   els.historyConnectorFilter.value = "all";
@@ -534,15 +535,16 @@ function exportHistoryData(type) {
 
 function bindHistoryEvents() {
   syncHistoryDateTriggers();
-  [els.historyDateFrom, els.historyDateTo, els.historyStationFilter, els.historyConnectorFilter, els.historyStatusFilter, els.historyChartMode]
+
+  // Các filter thông thường → chỉ render lại
+  [els.historyDateFrom, els.historyDateTo, els.historyConnectorFilter, els.historyStatusFilter, els.historyChartMode]
     .filter(Boolean)
     .forEach((element) => element.addEventListener("change", renderHistoryView));
 
-  // Khi đổi station → rebuild connector dropdown rồi mới render
+  // Station filter → rebuild connector dropdown TRƯỚC rồi mới render
   if (els.historyStationFilter) {
     els.historyStationFilter.addEventListener("change", () => {
-      const selectedStation = els.historyStationFilter.value;
-      populateConnectorFilter(selectedStation);
+      populateConnectorFilter(els.historyStationFilter.value);
       renderHistoryView();
     });
   }

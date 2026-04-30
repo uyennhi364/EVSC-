@@ -307,20 +307,22 @@ async function fetchHistorySessions() {
   }
 }
 
-function populateConnectorFilter(selectedStationId = "all") {
+function populateConnectorFilter(selectedStationId) {
   if (!els.historyConnectorFilter) return;
 
+  // Lấy connector dựa theo station được chọn
   let connectors;
-  if (selectedStationId === "all") {
-    // Hiển thị tất cả connector từ tất cả session
-    connectors = [...new Set(allHistorySessions.map((item) => item.connector))].filter(Boolean);
+  if (!selectedStationId || selectedStationId === "all") {
+    // All stations → lấy tất cả connector từ toàn bộ session
+    connectors = [...new Set(allHistorySessions.map((s) => s.connector).filter(Boolean))];
   } else {
-    // Chỉ lấy connector thuộc station được chọn
+    // Station cụ thể → chỉ lấy connector của station đó
     connectors = [...new Set(
       allHistorySessions
-        .filter((item) => item.stationId === selectedStationId)
-        .map((item) => item.connector)
-    )].filter(Boolean);
+        .filter((s) => s.stationId === selectedStationId)
+        .map((s) => s.connector)
+        .filter(Boolean)
+    )];
   }
 
   if (connectors.length === 0) {
@@ -329,10 +331,10 @@ function populateConnectorFilter(selectedStationId = "all") {
   } else {
     els.historyConnectorFilter.disabled = false;
     els.historyConnectorFilter.innerHTML = ['<option value="all">All Connectors</option>']
-      .concat(connectors.map((connector) => `<option value="${connector}">${connector}</option>`))
+      .concat(connectors.map((c) => `<option value="${c}">${c}</option>`))
       .join("");
   }
-  // Reset về All Connectors mỗi khi rebuild
+  // Luôn reset về "all" khi rebuild
   els.historyConnectorFilter.value = "all";
 }
 
@@ -344,7 +346,7 @@ function populateHistoryFilters() {
     els.historyStationFilter.value = HISTORY_FILTER_DEFAULTS.station;
   }
 
-  // Populate connector dựa theo station mặc định
+  // Populate connector theo station mặc định
   populateConnectorFilter(HISTORY_FILTER_DEFAULTS.station);
 }
 
@@ -352,7 +354,7 @@ function resetHistoryFilters() {
   if (els.historyDateFrom) els.historyDateFrom.value = HISTORY_FILTER_DEFAULTS.dateFrom;
   if (els.historyDateTo) els.historyDateTo.value = HISTORY_FILTER_DEFAULTS.dateTo;
   if (els.historyStationFilter) els.historyStationFilter.value = HISTORY_FILTER_DEFAULTS.station;
-  // Rebuild connector theo station mặc định rồi reset
+  // Rebuild connector khi reset
   populateConnectorFilter(HISTORY_FILTER_DEFAULTS.station);
   if (els.historyStatusFilter) els.historyStatusFilter.value = HISTORY_FILTER_DEFAULTS.status;
   if (els.historyChartMode) els.historyChartMode.value = HISTORY_FILTER_DEFAULTS.chartMode;
@@ -539,15 +541,16 @@ function exportHistoryData(type) {
 
 function bindHistoryEvents() {
   syncHistoryDateTriggers();
-  [els.historyDateFrom, els.historyDateTo, els.historyStationFilter, els.historyConnectorFilter, els.historyStatusFilter, els.historyChartMode]
+
+  // Các filter thông thường → chỉ render lại
+  [els.historyDateFrom, els.historyDateTo, els.historyConnectorFilter, els.historyStatusFilter, els.historyChartMode]
     .filter(Boolean)
     .forEach((element) => element.addEventListener("change", renderHistoryView));
 
-  // Khi đổi station → rebuild connector dropdown rồi mới render
+  // Station filter → rebuild connector dropdown TRƯỚC rồi mới render
   if (els.historyStationFilter) {
     els.historyStationFilter.addEventListener("change", () => {
-      const selectedStation = els.historyStationFilter.value;
-      populateConnectorFilter(selectedStation);
+      populateConnectorFilter(els.historyStationFilter.value);
       renderHistoryView();
     });
   }
