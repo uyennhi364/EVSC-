@@ -305,19 +305,26 @@ async function fetchHistorySessions() {
     console.error(error);
     allHistorySessions = [];
   }
-  // Build map stationId → poles ngay sau khi có data
-  buildStationPolesMap();
 }
 
-// Map stationId → danh sách pole codes, build từ session data sau khi fetch
+// Map stationId → Set of pole ids, build từ API /poles
+let allPoles = [];
 let stationPolesMap = {};
 
-function buildStationPolesMap() {
+async function fetchAllPoles() {
+  if (!API_BASE) return;
+  try {
+    const json = await apiJson("/poles");
+    allPoles = Array.isArray(json?.data) ? json.data : [];
+  } catch (error) {
+    console.error(error);
+    allPoles = [];
+  }
   stationPolesMap = {};
-  allHistorySessions.forEach((s) => {
-    if (!s.stationId || !s.connector) return;
-    if (!stationPolesMap[s.stationId]) stationPolesMap[s.stationId] = new Set();
-    stationPolesMap[s.stationId].add(s.connector);
+  allPoles.forEach((p) => {
+    if (!p.stationId || !p.id) return;
+    if (!stationPolesMap[p.stationId]) stationPolesMap[p.stationId] = new Set();
+    stationPolesMap[p.stationId].add(p.id);
   });
 }
 
@@ -326,15 +333,14 @@ function populateConnectorFilter(selectedStationId) {
 
   let connectors;
   if (!selectedStationId || selectedStationId === "all") {
-    // All stations → tất cả connector từ mọi session
-    connectors = [...new Set(allHistorySessions.map((s) => s.connector).filter(Boolean))];
+    // All stations → tất cả poles
+    connectors = [...new Set(allPoles.map((p) => p.id).filter(Boolean))];
   } else {
-    // Station cụ thể → chỉ lấy pole thuộc station đó
+    // Station cụ thể → chỉ lấy poles thuộc station đó
     const polesOfStation = stationPolesMap[selectedStationId];
     connectors = polesOfStation ? [...polesOfStation] : [];
   }
 
-  // Sắp xếp để dễ nhìn
   connectors.sort();
 
   if (connectors.length === 0) {
@@ -346,7 +352,6 @@ function populateConnectorFilter(selectedStationId) {
       .concat(connectors.map((c) => `<option value="${c}">${c}</option>`))
       .join("");
   }
-  // Reset về "all" mỗi khi rebuild
   els.historyConnectorFilter.value = "all";
 }
 
@@ -667,7 +672,7 @@ async function init() {
   initNotifToggle();
   updateNotificationBadge();
   bindHistoryEvents();
-  await Promise.all([fetchStations(), fetchHistorySessions()]);
+  await Promise.all([fetchStations(), fetchHistorySessions(), fetchAllPoles()]);
   populateHistoryFilters();
   renderHistoryView();
 }
