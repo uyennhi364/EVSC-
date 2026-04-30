@@ -13,7 +13,7 @@ public class ChargingSession : AuditableEntity
     public decimal EnergyKwh { get; set; }
     public int DurationMinutes { get; set; }
     public decimal Cost { get; set; }
-    public SessionStatus Status { get; set; } = SessionStatus.Ongoing;
+    public SessionStatus Status { get; set; } = SessionStatus.Charging;
 
     public Station? Station { get; set; }
     public Pole? Pole { get; set; }

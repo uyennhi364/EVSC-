@@ -12,7 +12,7 @@ public class Alert : AuditableEntity
     public AlertSeverity Severity { get; set; } = AlertSeverity.Medium;
     public string Message { get; set; } = string.Empty;
     public DateTime OccurredAt { get; set; } = DateTime.UtcNow;
-    public AlertStatus Status { get; set; } = AlertStatus.New;
+    public AlertStatus Status { get; set; } = AlertStatus.Open;
     public string? Note { get; set; }
 
     public Station? Station { get; set; }
