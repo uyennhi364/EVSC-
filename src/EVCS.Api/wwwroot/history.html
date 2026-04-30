@@ -769,7 +769,7 @@
               <select id="historyStationFilter"></select>
             </div>
             <div class="history-field">
-              <label for="historyConnectorFilter">Connector</label>
+              <label for="historyConnectorFilter">Pole</label>
               <select id="historyConnectorFilter"></select>
             </div>
             <div class="history-field">
@@ -832,11 +832,12 @@
                 <tr>
                   <th>Session ID</th>
                   <th>Station</th>
-                  <th>Connector</th>
+                  <th>Pole</th>
                   <th>Start</th>
                   <th>End</th>
                   <th>kWh</th>
                   <th>Duration</th>
+                  <th>Amount</th>
                   <th>Status</th>
                   <th></th>
                 </tr>
@@ -866,7 +867,7 @@
           <strong id="historyDetailStation" class="history-detail-item__value"></strong>
         </div>
         <div class="history-detail-item">
-          <span class="history-detail-item__label">Connector</span>
+          <span class="history-detail-item__label">Pole</span>
           <strong id="historyDetailConnector" class="history-detail-item__value"></strong>
         </div>
         <div class="history-detail-item">
@@ -888,6 +889,10 @@
         <div class="history-detail-item">
           <span class="history-detail-item__label">Duration</span>
           <strong id="historyDetailDuration" class="history-detail-item__value"></strong>
+        </div>
+        <div class="history-detail-item">
+          <span class="history-detail-item__label">Amount</span>
+          <strong id="historyDetailAmount" class="history-detail-item__value"></strong>
         </div>
       </div>
     </div>

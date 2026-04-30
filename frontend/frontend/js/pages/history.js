@@ -107,6 +107,7 @@ const els = {
   historyDetailEnd: document.getElementById("historyDetailEnd"),
   historyDetailEnergy: document.getElementById("historyDetailEnergy"),
   historyDetailDuration: document.getElementById("historyDetailDuration"),
+  historyDetailAmount: document.getElementById("historyDetailAmount"),
 };
 
 const HISTORY_FILTER_DEFAULTS = {
@@ -333,8 +334,10 @@ function populateConnectorFilter(selectedStationId) {
 
   let connectors;
   if (!selectedStationId || selectedStationId === "all") {
+    // All stations → tất cả poles
     connectors = [...new Set(allPoles.map((p) => p.id).filter(Boolean))];
   } else {
+    // Station cụ thể → chỉ lấy poles thuộc station đó
     const polesOfStation = stationPolesMap[selectedStationId];
     connectors = polesOfStation ? [...polesOfStation] : [];
   }
@@ -342,11 +345,11 @@ function populateConnectorFilter(selectedStationId) {
   connectors.sort();
 
   if (connectors.length === 0) {
-    els.historyConnectorFilter.innerHTML = '<option value="all">No connectors available</option>';
+    els.historyConnectorFilter.innerHTML = '<option value="all">No poles available</option>';
     els.historyConnectorFilter.disabled = true;
   } else {
     els.historyConnectorFilter.disabled = false;
-    els.historyConnectorFilter.innerHTML = ['<option value="all">All Connectors</option>']
+    els.historyConnectorFilter.innerHTML = ['<option value="all">All Poles</option>']
       .concat(connectors.map((c) => `<option value="${c}">${c}</option>`))
       .join("");
   }
@@ -361,6 +364,7 @@ function populateHistoryFilters() {
     els.historyStationFilter.value = HISTORY_FILTER_DEFAULTS.station;
   }
 
+  // Populate connector theo station mặc định
   populateConnectorFilter(HISTORY_FILTER_DEFAULTS.station);
 }
 
@@ -368,6 +372,7 @@ function resetHistoryFilters() {
   if (els.historyDateFrom) els.historyDateFrom.value = HISTORY_FILTER_DEFAULTS.dateFrom;
   if (els.historyDateTo) els.historyDateTo.value = HISTORY_FILTER_DEFAULTS.dateTo;
   if (els.historyStationFilter) els.historyStationFilter.value = HISTORY_FILTER_DEFAULTS.station;
+  // Rebuild connector khi reset
   populateConnectorFilter(HISTORY_FILTER_DEFAULTS.station);
   if (els.historyStatusFilter) els.historyStatusFilter.value = HISTORY_FILTER_DEFAULTS.status;
   if (els.historyChartMode) els.historyChartMode.value = HISTORY_FILTER_DEFAULTS.chartMode;
@@ -464,6 +469,7 @@ function renderHistoryTable(sessions) {
       <td>${formatHistoryDateTime(session.end)}</td>
       <td>${session.kwh.toFixed(1)}</td>
       <td>${session.duration} min</td>
+      <td>${session.cost != null ? session.cost.toLocaleString("vi-VN") + " ₫" : "—"}</td>
       <td><span class="history-session-status history-session-status--${session.status}">${formatHistoryStatus(session.status)}</span></td>
       <td><button type="button" class="history-detail-btn" data-session-id="${session.id}">View</button></td>
     </tr>
@@ -489,6 +495,11 @@ function openHistoryDetail(sessionId) {
   if (els.historyDetailEnd) els.historyDetailEnd.textContent = formatHistoryDateTime(currentHistorySession.end);
   if (els.historyDetailEnergy) els.historyDetailEnergy.textContent = `${currentHistorySession.kwh.toFixed(1)} kWh`;
   if (els.historyDetailDuration) els.historyDetailDuration.textContent = `${currentHistorySession.duration} min`;
+  if (els.historyDetailAmount) {
+    els.historyDetailAmount.textContent = currentHistorySession.cost != null
+      ? `${currentHistorySession.cost.toLocaleString("vi-VN")} ₫`
+      : "—";
+  }
   els.historyDetailOverlay.classList.add("is-open");
   els.historyDetailOverlay.setAttribute("aria-hidden", "false");
 }
@@ -518,7 +529,7 @@ function closeHistoryExportMenu() {
 function exportHistoryData(type) {
   try {
     const sessions = filteredHistorySessions.length ? filteredHistorySessions : getFilteredHistorySessions();
-    const header = ["Session ID", "Station", "Connector", "Start", "End", "kWh", "Duration", "Cost", "Status"];
+    const header = ["Session ID", "Station", "Pole", "Start", "End", "kWh", "Duration", "Amount", "Status"];
     const rows = sessions.map((item) => [
       item.id,
       `${item.stationId} - ${item.stationName}`,
