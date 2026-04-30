@@ -232,10 +232,7 @@
       <section id="detailView" class="card is-hidden">
         <div class="detail-header">
           <h2>Pole Details</h2>
-          <div style="display:flex;gap:8px;align-items:center;">
-            <button type="button" id="detailPoleDeleteBtn" class="pole-drawer__btn pole-drawer__btn--danger" style="font-size:13px;padding:8px 16px;">Delete</button>
-            <button type="button" id="backToListBtn" class="icon-btn" aria-label="Back to list">×</button>
-          </div>
+          <button type="button" id="backToListBtn" class="icon-btn" aria-label="Back to list">×</button>
         </div>
 
         <div class="detail-grid">
@@ -347,7 +344,6 @@
       </form>
 
       <footer class="pole-drawer__footer">
-        <button type="button" id="deletePoleFormBtn" class="pole-drawer__btn pole-drawer__btn--danger is-hidden" aria-label="Delete pole">Delete</button>
         <button type="button" id="cancelPoleFormBtn" class="pole-drawer__btn pole-drawer__btn--secondary">Cancel</button>
         <button type="submit" form="poleForm" id="savePoleFormBtn" class="pole-drawer__btn pole-drawer__btn--primary">Save</button>
       </footer>
@@ -374,23 +370,6 @@
       <div class="pole-confirm-modal__actions">
         <button type="button" id="cancelDeactivatePoleBtn" class="pole-confirm-modal__btn pole-confirm-modal__btn--secondary">Cancel</button>
         <button type="button" id="confirmDeactivatePoleBtn" class="pole-confirm-modal__btn pole-confirm-modal__btn--danger">Confirm</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Delete confirm modal -->
-  <div id="deletePoleBackdrop" class="pole-confirm-overlay" aria-hidden="true">
-    <div id="deletePoleModal" class="pole-confirm-modal" role="dialog" aria-modal="true" aria-labelledby="deletePoleModalTitle" aria-hidden="true">
-      <div class="pole-confirm-modal__icon" style="background:#fee2e2;color:#dc2626;">
-        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-          <path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-      </div>
-      <h2 id="deletePoleModalTitle" class="pole-confirm-modal__title">Delete Pole?</h2>
-      <p id="deletePoleModalMessage" class="pole-confirm-modal__message pole-confirm-modal__message--center">Are you sure you want to delete this pole? This action cannot be undone.</p>
-      <div class="pole-confirm-modal__actions">
-        <button type="button" id="deletePoleNoBtn" class="pole-confirm-modal__btn pole-confirm-modal__btn--secondary">Cancel</button>
-        <button type="button" id="deletePoleYesBtn" class="pole-confirm-modal__btn pole-confirm-modal__btn--danger">Delete</button>
       </div>
     </div>
   </div>

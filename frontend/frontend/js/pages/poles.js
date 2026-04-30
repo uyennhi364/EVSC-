@@ -77,13 +77,6 @@ const els = {
   pagePrev: document.getElementById("polePagePrev"),
   pageNext: document.getElementById("polePageNext"),
   pageNumbers: document.getElementById("polePageNumbers"),
-  deletePoleFormBtn: document.getElementById("deletePoleFormBtn"),
-  detailPoleDeleteBtn: document.getElementById("detailPoleDeleteBtn"),
-  deletePoleBackdrop: document.getElementById("deletePoleBackdrop"),
-  deletePoleModal: document.getElementById("deletePoleModal"),
-  deletePoleNoBtn: document.getElementById("deletePoleNoBtn"),
-  deletePoleYesBtn: document.getElementById("deletePoleYesBtn"),
-  deletePoleModalMessage: document.getElementById("deletePoleModalMessage"),
 };
 
 if (els.statusPopover) {
@@ -660,11 +653,6 @@ function openPoleForm(pole = null) {
   }
   if (els.poleFormStatus) els.poleFormStatus.value = pole ? pole.status : "Active";
 
-  // Hiện nút Delete chỉ khi đang edit, ẩn khi tạo mới
-  if (els.deletePoleFormBtn) {
-    els.deletePoleFormBtn.classList.toggle("is-hidden", !pole);
-  }
-
   if (els.formOverlay) {
     els.formOverlay.classList.add("is-open");
     els.formOverlay.setAttribute("aria-hidden", "false");
@@ -798,63 +786,6 @@ async function toggleActivePoleStatus() {
     fillDetailModal(updatedPole);
   }
   renderTable();
-}
-
-function openDeletePoleConfirm(poleId) {
-  const pole = getPoleById(poleId);
-  if (!pole) return;
-  state.activePoleId = poleId;
-  if (els.deletePoleModalMessage) {
-    els.deletePoleModalMessage.textContent = `Are you sure you want to delete pole "${pole.name}" (${pole.id})? This action cannot be undone.`;
-  }
-  if (els.deletePoleBackdrop) {
-    els.deletePoleBackdrop.classList.add("is-open");
-    els.deletePoleBackdrop.setAttribute("aria-hidden", "false");
-  }
-  if (els.deletePoleModal) {
-    els.deletePoleModal.classList.add("is-open");
-    els.deletePoleModal.setAttribute("aria-hidden", "false");
-  }
-}
-
-function closeDeletePoleConfirm() {
-  if (els.deletePoleBackdrop) {
-    els.deletePoleBackdrop.classList.remove("is-open");
-    els.deletePoleBackdrop.setAttribute("aria-hidden", "true");
-  }
-  if (els.deletePoleModal) {
-    els.deletePoleModal.classList.remove("is-open");
-    els.deletePoleModal.setAttribute("aria-hidden", "true");
-  }
-}
-
-async function confirmDeletePole() {
-  const poleId = state.activePoleId;
-  if (!poleId) return;
-
-  if (state.useApi) {
-    try {
-      await apiJson(`/poles/${encodeURIComponent(poleId)}`, { method: "DELETE" });
-      await refreshPolesFromApi();
-      closeDeletePoleConfirm();
-      closePoleForm();
-      closeDetailView();
-      renderTable();
-      window.alert("Pole deleted successfully.");
-    } catch (error) {
-      closeDeletePoleConfirm();
-      window.alert(error.message || "Unable to delete pole. It may have active sessions.");
-    }
-    return;
-  }
-
-  // Local fallback
-  state.poles = state.poles.filter((p) => p.id !== poleId);
-  closeDeletePoleConfirm();
-  closePoleForm();
-  closeDetailView();
-  renderTable();
-  window.alert("Pole deleted successfully.");
 }
 
 function bindEvents() {
@@ -1010,29 +941,6 @@ function bindEvents() {
 
   if (els.poleForm) {
     els.poleForm.addEventListener("submit", (event) => void savePoleForm(event));
-  }
-
-  // Delete pole — nút trong form drawer (chỉ hiện khi edit)
-  if (els.deletePoleFormBtn) {
-    els.deletePoleFormBtn.addEventListener("click", () => {
-      if (state.editingPoleId) openDeletePoleConfirm(state.editingPoleId);
-    });
-  }
-
-  // Delete pole — nút trong detail view
-  if (els.detailPoleDeleteBtn) {
-    els.detailPoleDeleteBtn.addEventListener("click", () => {
-      if (state.activePoleId) openDeletePoleConfirm(state.activePoleId);
-    });
-  }
-
-  // Confirm modal buttons
-  if (els.deletePoleNoBtn) els.deletePoleNoBtn.addEventListener("click", closeDeletePoleConfirm);
-  if (els.deletePoleYesBtn) els.deletePoleYesBtn.addEventListener("click", () => void confirmDeletePole());
-  if (els.deletePoleBackdrop) {
-    els.deletePoleBackdrop.addEventListener("click", (event) => {
-      if (event.target === els.deletePoleBackdrop) closeDeletePoleConfirm();
-    });
   }
 }
 

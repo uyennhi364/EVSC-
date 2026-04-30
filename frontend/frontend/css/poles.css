@@ -687,34 +687,6 @@
   background: #20b863;
 }
 
-.pole-drawer__btn--danger {
-  background: #dc2626;
-  color: #ffffff;
-  border: none;
-  border-radius: 10px;
-  cursor: pointer;
-  font-size: 14px;
-  font-weight: 600;
-}
-
-.pole-drawer__btn--danger:hover {
-  background: #b91c1c;
-}
-
-.pole-drawer__btn--danger.is-hidden {
-  display: none;
-}
-
-.pole-drawer__footer {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-}
-
-.pole-drawer__footer .pole-drawer__btn--danger {
-  margin-right: auto;
-}
-
 .pole-form-actions {
   display: flex;
   justify-content: flex-end;
