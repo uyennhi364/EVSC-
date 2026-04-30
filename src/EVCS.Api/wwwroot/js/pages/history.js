@@ -307,6 +307,35 @@ async function fetchHistorySessions() {
   }
 }
 
+function populateConnectorFilter(selectedStationId = "all") {
+  if (!els.historyConnectorFilter) return;
+
+  let connectors;
+  if (selectedStationId === "all") {
+    // Hiển thị tất cả connector từ tất cả session
+    connectors = [...new Set(allHistorySessions.map((item) => item.connector))].filter(Boolean);
+  } else {
+    // Chỉ lấy connector thuộc station được chọn
+    connectors = [...new Set(
+      allHistorySessions
+        .filter((item) => item.stationId === selectedStationId)
+        .map((item) => item.connector)
+    )].filter(Boolean);
+  }
+
+  if (connectors.length === 0) {
+    els.historyConnectorFilter.innerHTML = '<option value="all">No connectors available</option>';
+    els.historyConnectorFilter.disabled = true;
+  } else {
+    els.historyConnectorFilter.disabled = false;
+    els.historyConnectorFilter.innerHTML = ['<option value="all">All Connectors</option>']
+      .concat(connectors.map((connector) => `<option value="${connector}">${connector}</option>`))
+      .join("");
+  }
+  // Reset về All Connectors mỗi khi rebuild
+  els.historyConnectorFilter.value = "all";
+}
+
 function populateHistoryFilters() {
   if (els.historyStationFilter) {
     els.historyStationFilter.innerHTML = ['<option value="all">All Stations</option>']
@@ -315,20 +344,16 @@ function populateHistoryFilters() {
     els.historyStationFilter.value = HISTORY_FILTER_DEFAULTS.station;
   }
 
-  if (els.historyConnectorFilter) {
-    const connectors = [...new Set(allHistorySessions.map((item) => item.connector))];
-    els.historyConnectorFilter.innerHTML = ['<option value="all">All Connectors</option>']
-      .concat(connectors.map((connector) => `<option value="${connector}">${connector}</option>`))
-      .join("");
-    els.historyConnectorFilter.value = HISTORY_FILTER_DEFAULTS.connector;
-  }
+  // Populate connector dựa theo station mặc định
+  populateConnectorFilter(HISTORY_FILTER_DEFAULTS.station);
 }
 
 function resetHistoryFilters() {
   if (els.historyDateFrom) els.historyDateFrom.value = HISTORY_FILTER_DEFAULTS.dateFrom;
   if (els.historyDateTo) els.historyDateTo.value = HISTORY_FILTER_DEFAULTS.dateTo;
   if (els.historyStationFilter) els.historyStationFilter.value = HISTORY_FILTER_DEFAULTS.station;
-  if (els.historyConnectorFilter) els.historyConnectorFilter.value = HISTORY_FILTER_DEFAULTS.connector;
+  // Rebuild connector theo station mặc định rồi reset
+  populateConnectorFilter(HISTORY_FILTER_DEFAULTS.station);
   if (els.historyStatusFilter) els.historyStatusFilter.value = HISTORY_FILTER_DEFAULTS.status;
   if (els.historyChartMode) els.historyChartMode.value = HISTORY_FILTER_DEFAULTS.chartMode;
 
@@ -517,6 +542,15 @@ function bindHistoryEvents() {
   [els.historyDateFrom, els.historyDateTo, els.historyStationFilter, els.historyConnectorFilter, els.historyStatusFilter, els.historyChartMode]
     .filter(Boolean)
     .forEach((element) => element.addEventListener("change", renderHistoryView));
+
+  // Khi đổi station → rebuild connector dropdown rồi mới render
+  if (els.historyStationFilter) {
+    els.historyStationFilter.addEventListener("change", () => {
+      const selectedStation = els.historyStationFilter.value;
+      populateConnectorFilter(selectedStation);
+      renderHistoryView();
+    });
+  }
 
   if (els.historyDateFromTrigger) {
     els.historyDateFromTrigger.addEventListener("click", (event) => {
