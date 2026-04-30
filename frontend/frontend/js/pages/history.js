@@ -305,6 +305,19 @@ async function fetchHistorySessions() {
     console.error(error);
     allHistorySessions = [];
   }
+  buildStationPolesMap();
+}
+
+// Map stationId → danh sách pole codes, build từ session data sau khi fetch
+let stationPolesMap = {};
+
+function buildStationPolesMap() {
+  stationPolesMap = {};
+  allHistorySessions.forEach((s) => {
+    if (!s.stationId || !s.connector) return;
+    if (!stationPolesMap[s.stationId]) stationPolesMap[s.stationId] = new Set();
+    stationPolesMap[s.stationId].add(s.connector);
+  });
 }
 
 function populateConnectorFilter(selectedStationId) {
@@ -314,13 +327,11 @@ function populateConnectorFilter(selectedStationId) {
   if (!selectedStationId || selectedStationId === "all") {
     connectors = [...new Set(allHistorySessions.map((s) => s.connector).filter(Boolean))];
   } else {
-    connectors = [...new Set(
-      allHistorySessions
-        .filter((s) => s.stationId === selectedStationId)
-        .map((s) => s.connector)
-        .filter(Boolean)
-    )];
+    const polesOfStation = stationPolesMap[selectedStationId];
+    connectors = polesOfStation ? [...polesOfStation] : [];
   }
+
+  connectors.sort();
 
   if (connectors.length === 0) {
     els.historyConnectorFilter.innerHTML = '<option value="all">No connectors available</option>';

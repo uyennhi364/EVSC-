@@ -305,25 +305,37 @@ async function fetchHistorySessions() {
     console.error(error);
     allHistorySessions = [];
   }
+  // Build map stationId → poles ngay sau khi có data
+  buildStationPolesMap();
+}
+
+// Map stationId → danh sách pole codes, build từ session data sau khi fetch
+let stationPolesMap = {};
+
+function buildStationPolesMap() {
+  stationPolesMap = {};
+  allHistorySessions.forEach((s) => {
+    if (!s.stationId || !s.connector) return;
+    if (!stationPolesMap[s.stationId]) stationPolesMap[s.stationId] = new Set();
+    stationPolesMap[s.stationId].add(s.connector);
+  });
 }
 
 function populateConnectorFilter(selectedStationId) {
   if (!els.historyConnectorFilter) return;
 
-  // Lấy connector dựa theo station được chọn
   let connectors;
   if (!selectedStationId || selectedStationId === "all") {
-    // All stations → lấy tất cả connector từ toàn bộ session
+    // All stations → tất cả connector từ mọi session
     connectors = [...new Set(allHistorySessions.map((s) => s.connector).filter(Boolean))];
   } else {
-    // Station cụ thể → chỉ lấy connector của station đó
-    connectors = [...new Set(
-      allHistorySessions
-        .filter((s) => s.stationId === selectedStationId)
-        .map((s) => s.connector)
-        .filter(Boolean)
-    )];
+    // Station cụ thể → chỉ lấy pole thuộc station đó
+    const polesOfStation = stationPolesMap[selectedStationId];
+    connectors = polesOfStation ? [...polesOfStation] : [];
   }
+
+  // Sắp xếp để dễ nhìn
+  connectors.sort();
 
   if (connectors.length === 0) {
     els.historyConnectorFilter.innerHTML = '<option value="all">No connectors available</option>';
@@ -334,7 +346,7 @@ function populateConnectorFilter(selectedStationId) {
       .concat(connectors.map((c) => `<option value="${c}">${c}</option>`))
       .join("");
   }
-  // Luôn reset về "all" khi rebuild
+  // Reset về "all" mỗi khi rebuild
   els.historyConnectorFilter.value = "all";
 }
 
