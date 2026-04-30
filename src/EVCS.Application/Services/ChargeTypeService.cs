@@ -27,23 +27,22 @@ public sealed class ChargeTypeService : IChargeTypeService
     public async Task<ChargeTypeDetailDto> GetByIdAsync(int id, CancellationToken cancellationToken)
     {
         var chargeType = await _chargeTypeRepository.GetByIdAsync(id, cancellationToken)
-            ?? throw new AppException("Không tìm thấy loại sạc.", 404);
-
+            ?? throw new AppException("Charge type not found.", 404);
         return MapDetail(chargeType);
     }
 
     public async Task<ChargeTypeDetailDto> CreateAsync(CreateChargeTypeRequest request, CancellationToken cancellationToken)
     {
-        ValidationGuard.AgainstNullOrWhiteSpace(request.Code, "Mã loại sạc không được để trống.");
-        ValidationGuard.AgainstNullOrWhiteSpace(request.Name, "Tên loại sạc không được để trống.");
-        ValidationGuard.Against(request.MaxVoltage <= 0, "Điện áp tối đa phải lớn hơn 0.");
-        ValidationGuard.Against(request.MaxCurrent <= 0, "Dòng điện tối đa phải lớn hơn 0.");
+        ValidationGuard.AgainstNullOrWhiteSpace(request.Code, "Charge type code is required.");
+        ValidationGuard.AgainstNullOrWhiteSpace(request.Name, "Charge type name is required.");
+        ValidationGuard.Against(request.MaxVoltage <= 0, "Max voltage must be greater than 0.");
+        ValidationGuard.Against(request.MaxCurrent <= 0, "Max current must be greater than 0.");
 
         var existedCode = await _chargeTypeRepository.ExistsByCodeAsync(request.Code.Trim(), null, cancellationToken);
-        ValidationGuard.Against(existedCode, "Mã loại sạc đã tồn tại.");
+        ValidationGuard.Against(existedCode, "Charge type code already exists.");
 
         var existedName = await _chargeTypeRepository.ExistsByNameAsync(request.Name.Trim(), null, cancellationToken);
-        ValidationGuard.Against(existedName, "Tên loại sạc đã tồn tại.");
+        ValidationGuard.Against(existedName, "Charge type name already exists.");
 
         var chargeType = new ChargeType
         {
@@ -58,21 +57,20 @@ public sealed class ChargeTypeService : IChargeTypeService
 
         await _chargeTypeRepository.AddAsync(chargeType, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
-
         return MapDetail(chargeType);
     }
 
     public async Task<ChargeTypeDetailDto> UpdateAsync(int id, UpdateChargeTypeRequest request, CancellationToken cancellationToken)
     {
         var chargeType = await _chargeTypeRepository.GetByIdAsync(id, cancellationToken)
-            ?? throw new AppException("Không tìm thấy loại sạc.", 404);
+            ?? throw new AppException("Charge type not found.", 404);
 
-        ValidationGuard.AgainstNullOrWhiteSpace(request.Name, "Tên loại sạc không được để trống.");
-        ValidationGuard.Against(request.MaxVoltage <= 0, "Điện áp tối đa phải lớn hơn 0.");
-        ValidationGuard.Against(request.MaxCurrent <= 0, "Dòng điện tối đa phải lớn hơn 0.");
+        ValidationGuard.AgainstNullOrWhiteSpace(request.Name, "Charge type name is required.");
+        ValidationGuard.Against(request.MaxVoltage <= 0, "Max voltage must be greater than 0.");
+        ValidationGuard.Against(request.MaxCurrent <= 0, "Max current must be greater than 0.");
 
         var existedName = await _chargeTypeRepository.ExistsByNameAsync(request.Name.Trim(), id, cancellationToken);
-        ValidationGuard.Against(existedName, "Tên loại sạc đã tồn tại.");
+        ValidationGuard.Against(existedName, "Charge type name already exists.");
 
         chargeType.Name = request.Name.Trim();
         chargeType.MaxVoltage = request.MaxVoltage;
@@ -88,35 +86,23 @@ public sealed class ChargeTypeService : IChargeTypeService
     public async Task DeleteAsync(int id, CancellationToken cancellationToken)
     {
         var chargeType = await _chargeTypeRepository.GetByIdAsync(id, cancellationToken)
-            ?? throw new AppException("Không tìm thấy loại sạc.", 404);
+            ?? throw new AppException("Charge type not found.", 404);
 
         var isInUse = await _chargeTypeRepository.IsInUseAsync(id, cancellationToken);
-        ValidationGuard.Against(isInUse, "Không thể xóa loại sạc đang được sử dụng.");
+        ValidationGuard.Against(isInUse, "Cannot delete a charge type that is currently in use.");
 
         _chargeTypeRepository.Remove(chargeType);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
     }
 
     private static ChargeTypeSummaryDto MapSummary(ChargeType chargeType)
-        => new(
-            chargeType.Id,
-            chargeType.Code,
-            chargeType.Name,
-            chargeType.MaxVoltage,
-            chargeType.MaxCurrent,
-            chargeType.SuitableCar,
-            chargeType.Status,
-            chargeType.CreatedAt);
+        => new(chargeType.Id, chargeType.Code, chargeType.Name,
+               chargeType.MaxVoltage, chargeType.MaxCurrent,
+               chargeType.SuitableCar, chargeType.Status, chargeType.CreatedAt);
 
     private static ChargeTypeDetailDto MapDetail(ChargeType chargeType)
-        => new(
-            chargeType.Id,
-            chargeType.Code,
-            chargeType.Name,
-            chargeType.MaxVoltage,
-            chargeType.MaxCurrent,
-            chargeType.SuitableCar,
-            chargeType.Status,
-            chargeType.CreatedAt,
-            chargeType.UpdatedAt);
+        => new(chargeType.Id, chargeType.Code, chargeType.Name,
+               chargeType.MaxVoltage, chargeType.MaxCurrent,
+               chargeType.SuitableCar, chargeType.Status,
+               chargeType.CreatedAt, chargeType.UpdatedAt);
 }

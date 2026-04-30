@@ -80,8 +80,8 @@ public class UsageHistoryController : ControllerBase
     };
 
     /// <summary>
-    /// Map SessionStatus → chuỗi frontend.
-    /// "charging" = phiên đang diễn ra (trước đây là "ongoing").
+    /// Map SessionStatus to frontend string.
+    /// "charging" = session in progress.
     /// </summary>
     private static string MapStatus(SessionStatus s) => s switch
     {

@@ -29,20 +29,20 @@ public sealed class PoleService : IPoleService
     public async Task<PoleSummaryDto> GetByIdAsync(int id, CancellationToken cancellationToken)
     {
         var pole = await _poleRepository.GetByIdAsync(id, includeChildren: true, cancellationToken)
-            ?? throw new AppException("Không tìm th?y tr? s?c.", 404);
+            ?? throw new AppException("Pole not found.", 404);
         return Map(pole);
     }
 
     public async Task<PoleSummaryDto> CreateAsync(CreatePoleRequest request, CancellationToken cancellationToken)
     {
-        ValidationGuard.AgainstNullOrWhiteSpace(request.Name, "Tên tr? s?c không du?c d? tr?ng.");
-        ValidationGuard.AgainstNullOrWhiteSpace(request.Code, "Mã tr? không du?c d? tr?ng.");
+        ValidationGuard.AgainstNullOrWhiteSpace(request.Name, "Pole name is required.");
+        ValidationGuard.AgainstNullOrWhiteSpace(request.Code, "Pole code is required.");
 
         var station = await _stationRepository.GetByIdAsync(request.StationId, includeChildren: false, cancellationToken)
-            ?? throw new AppException("Không tìm th?y tr?m s?c.", 404);
+            ?? throw new AppException("Station not found.", 404);
 
         var existed = await _poleRepository.ExistsByCodeAsync(request.Code.Trim(), null, cancellationToken);
-        ValidationGuard.Against(existed, "Mã tr? dã t?n t?i.");
+        ValidationGuard.Against(existed, "Pole code already exists.");
 
         var pole = new Pole
         {
@@ -66,16 +66,16 @@ public sealed class PoleService : IPoleService
     public async Task<PoleSummaryDto> UpdateAsync(int id, UpdatePoleRequest request, CancellationToken cancellationToken)
     {
         var pole = await _poleRepository.GetByIdAsync(id, includeChildren: false, cancellationToken)
-            ?? throw new AppException("Không tìm th?y tr? s?c.", 404);
+            ?? throw new AppException("Pole not found.", 404);
 
-        ValidationGuard.AgainstNullOrWhiteSpace(request.Name, "Tên tr? s?c không du?c d? tr?ng.");
-        ValidationGuard.AgainstNullOrWhiteSpace(request.Code, "Mã tr? không du?c d? tr?ng.");
+        ValidationGuard.AgainstNullOrWhiteSpace(request.Name, "Pole name is required.");
+        ValidationGuard.AgainstNullOrWhiteSpace(request.Code, "Pole code is required.");
 
         var station = await _stationRepository.GetByIdAsync(request.StationId, includeChildren: false, cancellationToken)
-            ?? throw new AppException("Không tìm th?y tr?m s?c.", 404);
+            ?? throw new AppException("Station not found.", 404);
 
         var existed = await _poleRepository.ExistsByCodeAsync(request.Code.Trim(), id, cancellationToken);
-        ValidationGuard.Against(existed, "Mã tr? dã t?n t?i.");
+        ValidationGuard.Against(existed, "Pole code already exists.");
 
         pole.Name = request.Name.Trim();
         pole.Code = request.Code.Trim();
@@ -94,7 +94,7 @@ public sealed class PoleService : IPoleService
     public async Task DeleteAsync(int id, CancellationToken cancellationToken)
     {
         var pole = await _poleRepository.GetByIdAsync(id, includeChildren: false, cancellationToken)
-            ?? throw new AppException("Không tìm th?y tr? s?c.", 404);
+            ?? throw new AppException("Pole not found.", 404);
         _poleRepository.Remove(pole);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
     }
@@ -102,7 +102,7 @@ public sealed class PoleService : IPoleService
     public async Task<PoleSummaryDto> DeactivateAsync(int id, CancellationToken cancellationToken)
     {
         var pole = await _poleRepository.GetByIdAsync(id, includeChildren: false, cancellationToken)
-            ?? throw new AppException("Không tìm th?y tr? s?c.", 404);
+            ?? throw new AppException("Pole not found.", 404);
         pole.Status = PoleStatus.Inactive;
         pole.UpdatedAt = DateTime.UtcNow;
         await _unitOfWork.SaveChangesAsync(cancellationToken);
@@ -112,7 +112,7 @@ public sealed class PoleService : IPoleService
     public async Task<PoleSummaryDto> ActivateAsync(int id, CancellationToken cancellationToken)
     {
         var pole = await _poleRepository.GetByIdAsync(id, includeChildren: false, cancellationToken)
-            ?? throw new AppException("Không tìm th?y tr? s?c.", 404);
+            ?? throw new AppException("Pole not found.", 404);
         pole.Status = PoleStatus.Available;
         pole.UpdatedAt = DateTime.UtcNow;
         await _unitOfWork.SaveChangesAsync(cancellationToken);
