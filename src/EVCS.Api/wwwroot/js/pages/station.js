@@ -1421,11 +1421,11 @@ function bindEvents() {
         return;
       }
       if (latNum < -90 || latNum > 90) {
-        showCreateError("Vĩ độ không hợp lệ. Phải trong khoảng -90 đến 90.");
+        showCreateError("Latitude is invalid. Must be between -90 and 90.");
         return;
       }
       if (lonNum < -180 || lonNum > 180) {
-        showCreateError("Kinh độ không hợp lệ. Phải trong khoảng -180 đến 180.");
+        showCreateError("Longitude is invalid. Must be between -180 and 180.");
         return;
       }
 
@@ -1489,7 +1489,7 @@ function bindEvents() {
           );
 
         if (isUnchanged) {
-          showCreateError("Th�ng tin tr?m d� t?n t?i. Vui l�ng th? l?i.");
+          showCreateError("Station information already exists. Please try again.");
           return;
         }
 
@@ -1499,7 +1499,7 @@ function bindEvents() {
             editingId
           )
         ) {
-          showCreateError("Th�ng tin tr?m d� t?n t?i. Vui l�ng th? l?i.");
+          showCreateError("Station information already exists. Please try again.");
           return;
         }
 
@@ -1527,7 +1527,7 @@ function bindEvents() {
       }
 
       if (isDuplicateStationData({ name, address, latitude: String(latNum), longitude: String(lonNum) })) {
-        showCreateError("Th�ng tin tr?m d� t?n t?i. Vui l�ng th? l?i.");
+        showCreateError("Station information already exists. Please try again.");
         return;
       }
 

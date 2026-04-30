@@ -23,8 +23,8 @@ public class AlertsController : ControllerBase
     {
         AlertStatus? alertStatus = status?.ToLower() switch
         {
-            "new" or "open" => AlertStatus.New,
-            "acknowledged" => AlertStatus.Acknowledged,
+            "new" or "open" => AlertStatus.Open,
+            "inprogress" or "in_progress" or "acknowledged" => AlertStatus.InProgress,
             "resolved" => AlertStatus.Resolved,
             _ => null
         };
@@ -108,6 +108,7 @@ public class AlertsController : ControllerBase
     private static string MapStatus(AlertStatus s) => s switch
     {
         AlertStatus.Resolved => "resolved",
-        _ => "open"   // New and Acknowledged both show as "open" in frontend
+        AlertStatus.InProgress => "inprogress",
+        _ => "open"   // Open → "open" trong frontend
     };
 }

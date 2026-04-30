@@ -330,15 +330,23 @@ function getSeverityMeta(severity) {
 }
 
 function getStatusMeta(status) {
-  return status === "resolved"
-    ? {
+  switch (status) {
+    case "resolved":
+      return {
         label: "Resolved",
         className: "bg-emerald-100 text-emerald-700"
-      }
-    : {
-        label: "Unresolved",
+      };
+    case "inprogress":
+      return {
+        label: "In Progress",
+        className: "bg-blue-100 text-blue-700"
+      };
+    default:
+      return {
+        label: "Open",
         className: "bg-slate-200 text-slate-700"
       };
+  }
 }
 
 function formatAlertDateTime(value) {

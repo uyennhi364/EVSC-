@@ -28,7 +28,7 @@ public class UsageHistoryController : ControllerBase
     {
         SessionStatus? sessionStatus = status?.ToLower() switch
         {
-            "ongoing" => SessionStatus.Ongoing,
+            "charging" or "ongoing" => SessionStatus.Charging,
             "completed" => SessionStatus.Completed,
             "cancelled" => SessionStatus.Cancelled,
             "failed" => SessionStatus.Failed,
@@ -52,7 +52,7 @@ public class UsageHistoryController : ControllerBase
     {
         SessionStatus? sessionStatus = status?.ToLower() switch
         {
-            "ongoing" => SessionStatus.Ongoing,
+            "charging" or "ongoing" => SessionStatus.Charging,
             "completed" => SessionStatus.Completed,
             "cancelled" => SessionStatus.Cancelled,
             "failed" => SessionStatus.Failed,
@@ -79,11 +79,15 @@ public class UsageHistoryController : ControllerBase
         status = MapStatus(s.Status)
     };
 
+    /// <summary>
+    /// Map SessionStatus → chuỗi frontend.
+    /// "charging" = phiên đang diễn ra (trước đây là "ongoing").
+    /// </summary>
     private static string MapStatus(SessionStatus s) => s switch
     {
         SessionStatus.Completed => "completed",
         SessionStatus.Cancelled => "cancelled",
         SessionStatus.Failed => "failed",
-        _ => "ongoing"
+        _ => "charging"   // Charging → "charging"
     };
 }

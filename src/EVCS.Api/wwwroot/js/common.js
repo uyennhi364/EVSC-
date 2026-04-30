@@ -33,7 +33,7 @@ window.CommonUtils = {
   },
 
   createStatusBadge(status) {
-    if (!status) return "Không xác định";
+    if (!status) return "Unknown";
     return status;
   }
 };
