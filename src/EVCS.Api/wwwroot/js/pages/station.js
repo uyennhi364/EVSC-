@@ -2187,32 +2187,6 @@ function formatHistoryDateTime(value) {
   });
 }
 
-function populateConnectorFilterForStation(selectedStationId = "all") {
-  if (!els.historyConnectorFilter) return;
-
-  let connectors;
-  if (selectedStationId === "all") {
-    connectors = [...new Set(HISTORY_SESSIONS.map((item) => item.connector))].filter(Boolean);
-  } else {
-    connectors = [...new Set(
-      HISTORY_SESSIONS
-        .filter((item) => item.stationId === selectedStationId)
-        .map((item) => item.connector)
-    )].filter(Boolean);
-  }
-
-  if (connectors.length === 0) {
-    els.historyConnectorFilter.innerHTML = '<option value="all">No connectors available</option>';
-    els.historyConnectorFilter.disabled = true;
-  } else {
-    els.historyConnectorFilter.disabled = false;
-    els.historyConnectorFilter.innerHTML = ['<option value="all">All Connectors</option>']
-      .concat(connectors.map((connector) => `<option value="${connector}">${connector}</option>`))
-      .join("");
-  }
-  els.historyConnectorFilter.value = "all";
-}
-
 function populateHistoryFilters() {
   if (els.historyStationFilter) {
     const stationOptions = ['<option value="all">All Stations</option>']
@@ -2220,7 +2194,12 @@ function populateHistoryFilters() {
     els.historyStationFilter.innerHTML = stationOptions.join("");
   }
 
-  populateConnectorFilterForStation("all");
+  if (els.historyConnectorFilter) {
+    const connectors = [...new Set(HISTORY_SESSIONS.map((item) => item.connector))];
+    els.historyConnectorFilter.innerHTML = ['<option value="all">All Connectors</option>']
+      .concat(connectors.map((connector) => `<option value="${connector}">${connector}</option>`))
+      .join("");
+  }
 }
 
 function getFilteredHistorySessions() {
@@ -2440,15 +2419,6 @@ function bindHistoryEvents() {
     .forEach((element) => {
       element.addEventListener("change", renderHistoryView);
     });
-
-  // Khi đổi station → rebuild connector dropdown rồi mới render
-  if (els.historyStationFilter) {
-    els.historyStationFilter.addEventListener("change", () => {
-      const selectedStation = els.historyStationFilter.value;
-      populateConnectorFilterForStation(selectedStation);
-      renderHistoryView();
-    });
-  }
 
   if (els.historyDateFromTrigger) {
     els.historyDateFromTrigger.addEventListener("click", (event) => {
