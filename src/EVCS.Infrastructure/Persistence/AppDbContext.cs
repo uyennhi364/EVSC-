@@ -37,22 +37,23 @@ public class AppDbContext : DbContext, IUnitOfWork
 
     private static readonly ValueConverter<SessionStatus, string> SessionStatusConverter = new(
         v => v == SessionStatus.Charging ? "ongoing" : v.ToString().ToLower(),
-        v => v.ToLower() switch
-        {
-            "ongoing" or "charging" => SessionStatus.Charging,
-            "completed" => SessionStatus.Completed,
-            "cancelled" => SessionStatus.Cancelled,
-            "failed" => SessionStatus.Failed,
-            _ => Enum.Parse<SessionStatus>(v, true)
-        });
+        v => v.ToLower() == "ongoing" || v.ToLower() == "charging" ? SessionStatus.Charging
+            : v.ToLower() == "completed" ? SessionStatus.Completed
+            : v.ToLower() == "cancelled" ? SessionStatus.Cancelled
+            : v.ToLower() == "failed" ? SessionStatus.Failed
+            : SessionStatus.Charging);
 
     private static readonly ValueConverter<AlertSeverity, string> AlertSeverityConverter = new(
         v => v.ToString().ToLower(),
         v => Enum.Parse<AlertSeverity>(v, true));
 
     private static readonly ValueConverter<AlertStatus, string> AlertStatusConverter = new(
-        v => v.ToString().ToLower(),
-        v => Enum.Parse<AlertStatus>(v, true));
+        v => v == AlertStatus.Open ? "new"
+            : v == AlertStatus.InProgress ? "acknowledged"
+            : v.ToString().ToLower(),
+        v => v.ToLower() == "new" || v.ToLower() == "open" ? AlertStatus.Open
+            : v.ToLower() == "acknowledged" || v.ToLower() == "inprogress" ? AlertStatus.InProgress
+            : AlertStatus.Resolved);
 
     private static string PoleStatusToDb(PoleStatus v)
         => v == PoleStatus.InUse ? "in_use" : v.ToString().ToLower();
