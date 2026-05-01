@@ -36,8 +36,15 @@ public class AppDbContext : DbContext, IUnitOfWork
         v => PoleStatusFromDb(v));
 
     private static readonly ValueConverter<SessionStatus, string> SessionStatusConverter = new(
-        v => v.ToString().ToLower(),
-        v => Enum.Parse<SessionStatus>(v, true));
+        v => v == SessionStatus.Charging ? "ongoing" : v.ToString().ToLower(),
+        v => v.ToLower() switch
+        {
+            "ongoing" or "charging" => SessionStatus.Charging,
+            "completed" => SessionStatus.Completed,
+            "cancelled" => SessionStatus.Cancelled,
+            "failed" => SessionStatus.Failed,
+            _ => Enum.Parse<SessionStatus>(v, true)
+        });
 
     private static readonly ValueConverter<AlertSeverity, string> AlertSeverityConverter = new(
         v => v.ToString().ToLower(),

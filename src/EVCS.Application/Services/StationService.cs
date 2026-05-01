@@ -11,12 +11,15 @@ public sealed class StationService : IStationService
 {
     private readonly IStationRepository _stationRepository;
     private readonly IPoleRepository _poleRepository;
+    private readonly IChargingSessionRepository _sessionRepository;
     private readonly IUnitOfWork _unitOfWork;
 
-    public StationService(IStationRepository stationRepository, IPoleRepository poleRepository, IUnitOfWork unitOfWork)
+    public StationService(IStationRepository stationRepository, IPoleRepository poleRepository,
+        IChargingSessionRepository sessionRepository, IUnitOfWork unitOfWork)
     {
         _stationRepository = stationRepository;
         _poleRepository = poleRepository;
+        _sessionRepository = sessionRepository;
         _unitOfWork = unitOfWork;
     }
 
@@ -92,6 +95,11 @@ public sealed class StationService : IStationService
 
         if (station.Status == StationStatus.Active)
             throw new AppException("Cannot delete an active station. Please deactivate it first.", 400);
+
+        // Check for ongoing charging sessions
+        var hasActiveSession = await _sessionRepository.HasActiveSessionByStationIdAsync(id, cancellationToken);
+        if (hasActiveSession)
+            throw new AppException("Cannot delete a station with an ongoing charging session.", 400);
 
         var hasActivePole = await _poleRepository.ExistsActiveByStationIdAsync(id, cancellationToken);
         ValidationGuard.Against(hasActivePole, "Cannot delete a station that has active poles.");
